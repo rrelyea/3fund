@@ -63,21 +63,42 @@ function App() {
         <p id='status'>
           Loading price data
         </p>
+        <div id='stock'>
+
+        </div>
+        <div id='stockIntl'>
+
+        </div>
+        <div id='bond'>
+
+        </div>
       </header>
     </div>
   );
 }
 
+var rendered = false;
+
 function renderPage() {
+
   var status = document.getElementById('status');
-  if (monthlyStock != null && monthlyIntlStock != null && monthlyBond != null && dailyStock != null && dailyIntlStock != null && dailyBond != null)
+  var stock = document.getElementById('stock');
+  var stockIntl = document.getElementById('stockIntl');
+  var bond = document.getElementById('bond');
+  if (monthlyStock != null && monthlyIntlStock != null && monthlyBond != null && dailyStock != null && dailyIntlStock != null && dailyBond != null && rendered === false)
   {
-   status.textContent = "Loading price data......completed.";
-   console.log(monthlyStock.data, monthlyIntlStock.data, monthlyBond.data, dailyStock.data, dailyIntlStock.data, dailyBond.data);
-  }
-  else
-  {
-    status.textContent += ".";
+    rendered = true;
+    stock.innerText = "VTI";
+    stockIntl.innerText = "VXUS";
+    bond.innerText = "BND";
+    status.textContent = "Daily prices";
+    var length = dailyStock.data.length;
+
+    for (var i = 1; i < length - 1; i++) {
+        stock.innerText += "  " + dailyStock.data[i][1];
+        stockIntl.innerText += "  " + dailyIntlStock.data[i][1];
+        bond.innerText += "  " + dailyBond.data[i][1];
+    }
   }
 }
 
