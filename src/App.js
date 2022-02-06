@@ -63,6 +63,9 @@ function App() {
         <p id='status'>
           Loading price data
         </p>
+        <div id='dates'>
+
+        </div>
         <div id='stock'>
 
         </div>
@@ -82,12 +85,14 @@ var rendered = false;
 function renderPage() {
 
   var status = document.getElementById('status');
+  var dates = document.getElementById('dates');
   var stock = document.getElementById('stock');
   var stockIntl = document.getElementById('stockIntl');
   var bond = document.getElementById('bond');
   if (monthlyStock != null && monthlyIntlStock != null && monthlyBond != null && dailyStock != null && dailyIntlStock != null && dailyBond != null && rendered === false)
   {
     rendered = true;
+    dates.innerText = "";
     stock.innerText = "VTI";
     stockIntl.innerText = "VXUS";
     bond.innerText = "BND";
@@ -95,6 +100,7 @@ function renderPage() {
     var length = dailyStock.data.length;
 
     for (var i = 1; i < length - 1; i++) {
+        dates.innerText += "  " + dailyStock.data[i][0];
         stock.innerText += "  " + dailyStock.data[i][1];
         stockIntl.innerText += "  " + dailyIntlStock.data[i][1];
         bond.innerText += "  " + dailyBond.data[i][1];
