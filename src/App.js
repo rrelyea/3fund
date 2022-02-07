@@ -147,16 +147,15 @@ function renderPage() {
       }
     }
     
-    // var dailyLength = dailyStock.data.length;
-    // for (var i = 1; i < dailyLength - 1; i++) {
-    //     dates.innerText += "  " + dailyStock.data[i][0];
-    //     stock.innerText += "  " + dailyStock.data[i][1];
-    //     stockIntl.innerText += "  " + dailyIntlStock.data[i][1];
-    //     bond.innerText += "  " + dailyBond.data[i][1];
-    // }
-
+    var dailyLength = dailyStock.data.length;
+    for (var i = 1; i < dailyLength - 1; i++) {
+        dates.innerText += "  " + dailyStock.data[i][0];
+        stock.innerText += "  " + dailyStock.data[i][1];
+        stockIntl.innerText += "  " + dailyIntlStock.data[i][1];
+        bond.innerText += "  " + dailyBond.data[i][1];
     }
   }
+}
 
 
 export default App;
