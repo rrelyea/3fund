@@ -78,6 +78,16 @@ function App() {
               <td><div id='bond'>
               </div></td>
             </tr>
+            <tr>
+              <td><div id='Ddates'>
+              </div></td>
+              <td><div id='Dstock'>
+              </div></td>
+              <td><div id='DstockIntl'>
+              </div></td>
+              <td><div id='Dbond'>
+              </div></td>
+            </tr>
           </tbody>
         </table>
       </header>
@@ -87,7 +97,6 @@ function App() {
 
 
 function renderPage() {
-  console.log("renderpage");
   var status = document.getElementById('status');
   var dates = document.getElementById('dates');
   var stock = document.getElementById('stock');
@@ -95,7 +104,6 @@ function renderPage() {
   var bond = document.getElementById('bond');
   if (monthlyStock != null && monthlyIntlStock != null && monthlyBond != null && dailyStock != null && dailyIntlStock != null && dailyBond != null)
   {
-    console.log("dataready");
     dates.innerText = "";
     stock.innerText = "VTI";
     stockIntl.innerText = "VXUS";
@@ -105,18 +113,16 @@ function renderPage() {
     var iStocks = 1;
     var iStocksIntl = 1;
     var iBonds = 1;
-    while (true) {
+    var loop = true;
+    while (loop) {
       if (monthlyStock.data[iStocks].length === 1 
         || monthlyIntlStock.data[iStocksIntl].length === 1 
         || monthlyBond.data[iBonds].length === 1) {
-          return;
-      }
-      else
-      {
+          loop = false;
+      } else {
         var s = monthlyStock.data[iStocks][0];
         var sI = monthlyIntlStock.data[iStocksIntl][0];
         var b = monthlyBond.data[iBonds][0];
-        console.log(s, sI, b);
 
         var max;
         if (s < sI) {
@@ -124,8 +130,7 @@ function renderPage() {
         } else {
           max = s;
         }
-        if (max < b)
-        {
+        if (max < b) {
           max = b;
         }
         
@@ -133,9 +138,7 @@ function renderPage() {
         if (sI < max) iStocksIntl++;
         if (b < max) iBonds++;
 
-        if (s === sI && sI === b)
-        {
-          console.log(iStocks, iStocksIntl, iBonds);
+        if (s === sI && sI === b) {
           dates.innerText += "  " + monthlyStock.data[iStocks][0];
           stock.innerText += "  " + monthlyStock.data[iStocks][1];
           stockIntl.innerText += "  " + monthlyIntlStock.data[iStocksIntl][1];
@@ -146,16 +149,23 @@ function renderPage() {
         }
       }
     }
-    
+
+    var Ddates = document.getElementById('Ddates');
+    var Dstock = document.getElementById('Dstock');
+    var DstockIntl = document.getElementById('DstockIntl');
+    var Dbond = document.getElementById('Dbond');
+    Ddates.innerText = "";
+    Dstock.innerText = "VTI";
+    DstockIntl.innerText = "VXUS";
+    Dbond.innerText = "BND";
     var dailyLength = dailyStock.data.length;
     for (var i = 1; i < dailyLength - 1; i++) {
-        dates.innerText += "  " + dailyStock.data[i][0];
-        stock.innerText += "  " + dailyStock.data[i][1];
-        stockIntl.innerText += "  " + dailyIntlStock.data[i][1];
-        bond.innerText += "  " + dailyBond.data[i][1];
+        Ddates.innerText += "  " + dailyStock.data[i][0];
+        Dstock.innerText += "  " + dailyStock.data[i][1];
+        DstockIntl.innerText += "  " + dailyIntlStock.data[i][1];
+        Dbond.innerText += "  " + dailyBond.data[i][1];
     }
   }
 }
-
 
 export default App;
