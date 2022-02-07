@@ -85,7 +85,6 @@ function App() {
   );
 }
 
-var count = 0;
 
 function renderPage() {
   console.log("renderpage");
@@ -94,7 +93,7 @@ function renderPage() {
   var stock = document.getElementById('stock');
   var stockIntl = document.getElementById('stockIntl');
   var bond = document.getElementById('bond');
-  if (monthlyStock != null && monthlyIntlStock != null && monthlyBond != null && dailyStock != null && dailyIntlStock != null && dailyBond != null && count === 1)
+  if (monthlyStock != null && monthlyIntlStock != null && monthlyBond != null && dailyStock != null && dailyIntlStock != null && dailyBond != null)
   {
     console.log("dataready");
     dates.innerText = "";
@@ -102,10 +101,6 @@ function renderPage() {
     stockIntl.innerText = "VXUS";
     bond.innerText = "BND";
     status.textContent = "Daily prices";
-
-
-    var monthlyLength = Math.max(monthlyStock.data.length, monthlyIntlStock.data.length, monthlyBond.data.length); 
-    console.log(monthlyLength);
 
     var iStocks = 1;
     var iStocksIntl = 1;
@@ -161,8 +156,6 @@ function renderPage() {
     // }
 
     }
-
-    count = count + 1;
   }
 
 
