@@ -10,6 +10,8 @@ class App extends React.Component {
     startYear: 0,
     startMonth: 0,
     statusMessage: "Loading price data",
+    tickers: ['VTI', 'VXUS', 'BND'],
+    allocations: [2/3, .2, 1/3]
   };
 
   async toCsv(uri) {
@@ -28,13 +30,13 @@ class App extends React.Component {
 
   async componentDidMount () {
     this.state.monthlyQuotePromises = [
-      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_VTI.csv"),
-      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_VXUS.csv"),
-      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_BND.csv")];
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_" + this.state.tickers[0] + ".csv"),
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_" + this.state.tickers[1] + ".csv"),
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_" + this.state.tickers[2] + ".csv")];
     this.state.dailyQuotePromises = [
-      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/D_VTI.csv"),
-      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/D_VXUS.csv"),
-      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/D_BND.csv")];
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/D_" + this.state.tickers[0] + ".csv"),
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/D_" + this.state.tickers[1] + ".csv"),
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/D_" + this.state.tickers[2] + ".csv")];
 
     this.state.monthlyQuotes = await Promise.all(this.state.monthlyQuotePromises);
     this.state.dailyQuotes = await Promise.all(this.state.dailyQuotePromises);
@@ -86,6 +88,12 @@ class App extends React.Component {
           <h3 id='status'>
             {this.state.statusMessage}
           </h3>
+          <p id='tickers'>
+            {this.state.tickers.join(" - ")}
+          </p>
+          <p id='allocations'>
+            {this.state.allocations.map(allocation => <span>{(allocation * 100).toFixed(1)+"%  "}</span>  )}
+          </p>
           <table>
             <tr>
               <td className='column'>
@@ -177,9 +185,9 @@ function getDayChange(data, yearA, monthA, dayIndex, fund) {
 }
 
 function showYears (data) {
-  var assetStock = 2/3;
-  var assetStockIntl = .2;
-  var assetBond = 1/3;
+  var assetStock = data.allocations[0];
+  var assetStockIntl = data.allocations[1];
+  var assetBond = data.allocations[2];
   var currentMonth = new Date().getMonth();
   var currentYear = new Date().getFullYear();
 
@@ -203,9 +211,9 @@ function showYears (data) {
 }
 
 function showMonths (data) {
-  var assetStock = 2/3;
-  var assetStockIntl = .2;
-  var assetBond = 1/3;
+  var assetStock = data.allocations[0];
+  var assetStockIntl = data.allocations[1];
+  var assetBond = data.allocations[2];
   var currentMonth = new Date(). getMonth() + 1;
   var currentYear = new Date().getFullYear();
   var months = Array(currentMonth);
@@ -227,9 +235,9 @@ function showMonths (data) {
 }
 
 function showDays (data) {
-  var assetStock = 2/3;
-  var assetStockIntl = .2;
-  var assetBond = 1/3;
+  var assetStock = data.allocations[0];
+  var assetStockIntl = data.allocations[1];
+  var assetBond = data.allocations[2];
   var currentMonth = new Date().getMonth();
   var currentYear = new Date().getFullYear();
   var days = Array(currentMonth);
