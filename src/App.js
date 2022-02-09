@@ -88,12 +88,12 @@ class App extends React.Component {
           <h3 id='status'>
             {this.state.statusMessage}
           </h3>
-          <p id='tickers'>
+          <div id='tickers'>
             {this.state.tickers.join(" - ")}
-          </p>
-          <p id='allocations'>
+          </div>
+          <div id='allocations'>
             {this.state.allocations.map(allocation => <span>{(allocation * 100).toFixed(1)+"%  "}</span>  )}
-          </p>
+          </div>
           <table>
             <tr>
               <td className='column'>
@@ -203,7 +203,7 @@ function showYears (data) {
       (assetBond * 100 * delta3);
     composite = delta1 === null || delta2 === null || delta3 === null ? null : composite;
     years[currentYear-year] = new Array(2);
-    years[currentYear-year][0] = year;
+    years[currentYear-year][0] = year.toString().substr(2);
     years[currentYear-year][1] = composite;
   }
 
@@ -227,7 +227,7 @@ function showMonths (data) {
       (assetBond * 100 * delta3);
     composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
     months[currentMonth - month] = new Array(2);
-    months[currentMonth - month][0] = month;
+    months[currentMonth - month][0] = month < 10 ? "0" + month.toString() : month.toString();
     months[currentMonth - month][1] = composite;
   }
 
