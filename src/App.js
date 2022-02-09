@@ -92,7 +92,7 @@ class App extends React.Component {
                 <table>
                   <thead>
                     <tr>
-                      <th>Years</th>
+                      <th>Year</th>
                       <th>%</th>
                     </tr>
                   </thead>
@@ -105,7 +105,7 @@ class App extends React.Component {
                 <table>
                   <thead>
                     <tr>
-                      <th>Months</th>
+                      <th>Month</th>
                       <th>%</th>
                     </tr>
                   </thead>
@@ -118,7 +118,7 @@ class App extends React.Component {
                 <table>
                   <thead>
                     <tr>
-                      <th>Days</th>
+                      <th>Day</th>
                       <th>%</th>
                     </tr>
                   </thead>
@@ -233,8 +233,9 @@ function showDays (data) {
   var currentMonth = new Date().getMonth();
   var currentYear = new Date().getFullYear();
   var days = Array(currentMonth);
+  var dayCount = data.dailyQuotes[0].length - 2;
 
-  for (var dayIndex = 1; dayIndex < data.dailyQuotes[0].length - 1; dayIndex++) {
+  for (var dayIndex = dayCount; dayIndex >= 1 ; dayIndex--) {
     var delta1 = getDayChange(data, currentYear, currentMonth, dayIndex, 0);
     var delta2 = getDayChange(data, currentYear, currentMonth, dayIndex, 1);
     var delta3 = getDayChange(data, currentYear, currentMonth, dayIndex, 2);
@@ -242,9 +243,9 @@ function showDays (data) {
       (assetStock * 100 * (assetStockIntl)) * delta2 + 
       (assetBond * 100 * delta3);
     composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
-    days[dayIndex] = new Array(2);
-    days[dayIndex][0] = data.dailyQuotes[0][dayIndex][0].substr(5);
-    days[dayIndex][1] = composite;
+    days[dayCount - dayIndex] = new Array(2);
+    days[dayCount - dayIndex][0] = data.dailyQuotes[0][dayIndex][0].substr(5);
+    days[dayCount - dayIndex][1] = composite;
   }
 
   return days.map( period => <tr><td>{period[0]}</td><td>{Number(period[1]).toFixed(2)+"%"}</td></tr> );
