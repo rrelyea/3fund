@@ -6,9 +6,7 @@ class App extends React.Component {
   state = {
     monthlyQuotes: null,
     dailyQuotes: null,
-    iStocks: 1,
-    iStocksIntl: 1,
-    iBonds: 1,
+    indexes: [1,1,1],
     startYear: 0,
     startMonth: 0,
     statusMessage: "Loading price data",
@@ -46,14 +44,14 @@ class App extends React.Component {
 
     var loop = true;
     while (loop) {
-      if (this.state.monthlyQuotes[0][this.state.iStocks].length === 1 
-        || this.state.monthlyQuotes[1][this.state.iStocksIntl].length === 1 
-        || this.state.monthlyQuotes[2][this.state.iBonds].length === 1) {
+      if (this.state.monthlyQuotes[0][this.state.indexes[0]].length === 1 
+        || this.state.monthlyQuotes[1][this.state.indexes[1]].length === 1 
+        || this.state.monthlyQuotes[2][this.state.indexes[2]].length === 1) {
           loop = false;
       } else {
-        var s = this.state.monthlyQuotes[0][this.state.iStocks][0];
-        var sI = this.state.monthlyQuotes[1][this.state.iStocksIntl][0];
-        var b = this.state.monthlyQuotes[2][this.state.iBonds][0];
+        var s = this.state.monthlyQuotes[0][this.state.indexes[0]][0];
+        var sI = this.state.monthlyQuotes[1][this.state.indexes[1]][0];
+        var b = this.state.monthlyQuotes[2][this.state.indexes[2]][0];
   
         var max;
         if (s < sI) {
@@ -65,16 +63,14 @@ class App extends React.Component {
           max = b;
         }
         
-        if (s < max) this.state.iStocks++;
-        if (sI < max) this.state.iStocksIntl++;
-        if (b < max) this.state.iBonds++;
+        if (s < max) this.state.indexes[0] = this.state.indexes[0] + 1;
+        if (sI < max) this.state.indexes[1] = this.state.indexes[1] + 1;
+        if (b < max) this.state.indexes[2] = this.state.indexes[2] + 2;
   
         if (s === sI && sI === b) {
-  
-          var date = this.state.monthlyQuotes[0][this.state.iStocks][0];
+          var date = this.state.monthlyQuotes[0][this.state.indexes[0]][0];
           this.state.startYear = parseInt(date.substr(0,4));
           this.state.startMonth = parseInt(date.substr(5,2));
-          // status.innerText = startYear + " " + startMonth + " " + iStocks + " " + iStocksIntl + " " + iBonds;
           loop = false;
         }
       }
@@ -140,9 +136,9 @@ class App extends React.Component {
 
 function getPrice (data, year, month, fund) {
   var i = (year - data.startYear) * 12 + (month - data.startMonth);
-  if (i + data.iStocks < 1) return null;
-  if (i + data.iStocks > data.monthlyQuotes[fund].length) return null;
-  return data.monthlyQuotes[fund][i + data.iStocks][1];
+  if (i + data.indexes[fund] < 1) return null;
+  if (i + data.indexes[fund] > data.monthlyQuotes[fund].length) return null;
+  return data.monthlyQuotes[fund][i + data.indexes[fund]][1];
 }
 
 function getChange(data, yearA, monthA, yearB, monthB, fund) {
@@ -196,13 +192,13 @@ function showYears (data) {
     var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
       (assetStock * 100 * (assetStockIntl)) * delta2 + 
       (assetBond * 100 * delta3);
-    composite = delta1 == null || delta2 == null || delta3 == null ? composite : null;
+    composite = delta1 === null || delta2 === null || delta3 === null ? null : composite;
     years[currentYear-year] = new Array(2);
     years[currentYear-year][0] = year;
     years[currentYear-year][1] = composite;
   }
 
-  return years.map( annum => <tr><td>{annum[0]}</td><td>{Number(annum[1]).toFixed(2)+"%"}</td></tr> );
+  return years.map( period => <tr><td>{period[0]}</td><td>{Number(period[1]).toFixed(2)+"%"}</td></tr> );
 }
 
 function showMonths (data) {
@@ -220,13 +216,13 @@ function showMonths (data) {
     var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
       (assetStock * 100 * (assetStockIntl)) * delta2 + 
       (assetBond * 100 * delta3);
-    composite = delta1 == null || delta2 == null || delta3 == null ? composite : null;
+    composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
     months[month] = new Array(2);
     months[month][0] = month+"/"+currentYear;
     months[month][1] = composite;
   }
 
-  return months.map( annum => <tr><td>{annum[0]}</td><td>{Number(annum[1]).toFixed(2)+"%"}</td></tr> );
+  return months.map( period => <tr><td>{period[0]}</td><td>{Number(period[1]).toFixed(2)+"%"}</td></tr> );
 }
 
 function showDays (data) {
@@ -244,14 +240,13 @@ function showDays (data) {
     var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
       (assetStock * 100 * (assetStockIntl)) * delta2 + 
       (assetBond * 100 * delta3);
-    composite = delta1 == null || delta2 == null || delta3 == null ? composite : null;
+    composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
     days[dayIndex] = new Array(2);
     days[dayIndex][0] = data.dailyQuotes[0][dayIndex][0].substr(5);
     days[dayIndex][1] = composite;
   }
 
-  return days.map( annum => <tr><td>{annum[0]}</td><td>{Number(annum[1]).toFixed(2)+"%"}</td></tr> );
+  return days.map( period => <tr><td>{period[0]}</td><td>{Number(period[1]).toFixed(2)+"%"}</td></tr> );
 }
-
 
 export default App;
