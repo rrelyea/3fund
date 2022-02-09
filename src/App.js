@@ -91,39 +91,46 @@ class App extends React.Component {
             {this.state.statusMessage}
           </h3>
           <table>
-            <thead>
-              <tr>
-                <th>Year</th>
-                <th>Growth</th>
-              </tr>
-            </thead>
-            <tbody>
-                <>{showYears(this.state)}</>
-            </tbody>
-          </table>
-          <div>&nbsp;</div>
-          <table>
-            <thead>
-              <tr>
-                <th>Month</th>
-                <th>Growth</th>
-              </tr>
-            </thead>
-            <tbody>
-                <>{showMonths(this.state)}</>
-            </tbody>
-          </table>
-          <div>&nbsp;</div>
-          <table>
-            <thead>
-              <tr>
-                <th>Day</th>
-                <th>Growth</th>
-              </tr>
-            </thead>
-            <tbody>
-                <>{showDays(this.state)}</>
-            </tbody>
+            <tr>
+              <td>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Years</th>
+                      <th>%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                      <>{showYears(this.state)}</>
+                  </tbody>
+                </table>
+              </td>
+              <td>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Months</th>
+                      <th>%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                      <>{showMonths(this.state)}</>
+                  </tbody>
+                </table>
+                <div>&nbsp;</div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Days</th>
+                      <th>%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                      <>{showDays(this.state)}</>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
           </table>
         </header>
       </div>
@@ -190,9 +197,9 @@ function showYears (data) {
       (assetStock * 100 * (assetStockIntl)) * delta2 + 
       (assetBond * 100 * delta3);
     composite = delta1 == null || delta2 == null || delta3 == null ? composite : null;
-    years[year-data.startYear] = new Array(2);
-    years[year-data.startYear][0] = year;
-    years[year-data.startYear][1] = composite;
+    years[currentYear-year] = new Array(2);
+    years[currentYear-year][0] = year;
+    years[currentYear-year][1] = composite;
   }
 
   return years.map( annum => <tr><td>{annum[0]}</td><td>{Number(annum[1]).toFixed(2)+"%"}</td></tr> );
