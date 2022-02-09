@@ -35,3 +35,11 @@
 table {
   margin: 8px
 }
+
+td.column {
+  vertical-align:top
+}
+
+td.value {
+  text-align: right
+}

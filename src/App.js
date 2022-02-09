@@ -88,7 +88,7 @@ class App extends React.Component {
           </h3>
           <table>
             <tr>
-              <td>
+              <td className='column'>
                 <table>
                   <thead>
                     <tr>
@@ -101,7 +101,7 @@ class App extends React.Component {
                   </tbody>
                 </table>
               </td>
-              <td>
+              <td className='column'>
                 <table>
                   <thead>
                     <tr>
@@ -114,7 +114,7 @@ class App extends React.Component {
                   </tbody>
                 </table>
               </td>
-              <td>
+              <td className='column'>
                 <table>
                   <thead>
                     <tr>
@@ -199,18 +199,18 @@ function showYears (data) {
     years[currentYear-year][1] = composite;
   }
 
-  return years.map( period => <tr><td>{period[0]}</td><td>{Number(period[1]).toFixed(2)+"%"}</td></tr> );
+  return years.map( period => <tr><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(2)+"%"}</td></tr> );
 }
 
 function showMonths (data) {
   var assetStock = 2/3;
   var assetStockIntl = .2;
   var assetBond = 1/3;
-  var currentMonth = new Date().getMonth();
+  var currentMonth = new Date(). getMonth() + 1;
   var currentYear = new Date().getFullYear();
   var months = Array(currentMonth);
-
-  for (var month = 1; month <= currentMonth + 1; month++) {
+  
+  for (var month = currentMonth; month > 0; month--) {
     var delta1 = getChange(data, currentYear, month, currentYear, month, 0);
     var delta2 = getChange(data, currentYear, month, currentYear, month, 1);
     var delta3 = getChange(data, currentYear, month, currentYear, month, 2);
@@ -218,12 +218,12 @@ function showMonths (data) {
       (assetStock * 100 * (assetStockIntl)) * delta2 + 
       (assetBond * 100 * delta3);
     composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
-    months[month] = new Array(2);
-    months[month][0] = month+"/"+currentYear;
-    months[month][1] = composite;
+    months[currentMonth - month] = new Array(2);
+    months[currentMonth - month][0] = month;
+    months[currentMonth - month][1] = composite;
   }
 
-  return months.map( period => <tr><td>{period[0]}</td><td>{Number(period[1]).toFixed(2)+"%"}</td></tr> );
+  return months.map( period => <tr><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(2)+"%"}</td></tr> );
 }
 
 function showDays (data) {
@@ -244,11 +244,11 @@ function showDays (data) {
       (assetBond * 100 * delta3);
     composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
     days[dayCount - dayIndex] = new Array(2);
-    days[dayCount - dayIndex][0] = data.dailyQuotes[0][dayIndex][0].substr(5);
+    days[dayCount - dayIndex][0] = data.dailyQuotes[0][dayIndex][0].substr(8);
     days[dayCount - dayIndex][1] = composite;
   }
 
-  return days.map( period => <tr><td>{period[0]}</td><td>{Number(period[1]).toFixed(2)+"%"}</td></tr> );
+  return days.map( period => <tr><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(2)+"%"}</td></tr> );
 }
 
 export default App;
