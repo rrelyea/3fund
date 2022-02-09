@@ -113,7 +113,8 @@ class App extends React.Component {
                       <>{showMonths(this.state)}</>
                   </tbody>
                 </table>
-                <div>&nbsp;</div>
+              </td>
+              <td>
                 <table>
                   <thead>
                     <tr>
