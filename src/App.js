@@ -1,129 +1,60 @@
 import papaparse from 'papaparse';
+import React from 'react';
 import './App.css';
 
-var monthlyStock = null;
-var monthlyIntlStock = null;
-var monthlyBond = null;
-var dailyStock = null;
-var dailyIntlStock = null;
-var dailyBond = null;
+class App extends React.Component {
+  state = {
+    monthlyQuotes: null,
+    dailyQuotes: null,
+    iStocks: 1,
+    iStocksIntl: 1,
+    iBonds: 1,
+    startYear: 0,
+    startMonth: 0,
+    statusMessage: "Loading price data",
+  };
 
-function App() {
-  papaparse.parse("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_VTI.csv", {
-    download: true,
-    complete: function(data) {
-      monthlyStock = data;
-    }
-  });
+  async toCsv(uri) {
+    return new Promise((resolve, reject) => {
+      papaparse.parse(uri, {
+        download: true,
+        complete (results, file) {
+          resolve(results.data)
+        },
+        error (err, file) {
+          reject(err)
+        }
+      })
+    })
+  }
 
-  papaparse.parse("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_VXUS.csv", {
-    download: true,
-    complete: function(data) {
-      monthlyIntlStock = data;
-    }
-  });
+  async componentDidMount () {
+    this.state.monthlyQuotePromises = [
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_VTI.csv"),
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_VXUS.csv"),
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_BND.csv")];
+    this.state.dailyQuotePromises = [
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/D_VTI.csv"),
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/D_VXUS.csv"),
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/D_BND.csv")];
 
-  papaparse.parse("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_BND.csv", {
-    download: true,
-    complete: function(data) {
-      monthlyBond = data;
-    }
-  });
+    this.state.monthlyQuotes = await Promise.all(this.state.monthlyQuotePromises);
+    this.state.dailyQuotes = await Promise.all(this.state.dailyQuotePromises);
 
-  papaparse.parse("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/D_VTI.csv", {
-    download: true,
-    complete: function(data) {
-      dailyStock = data;
-    }
-  });
+    this.state.dailyQuotePromises = null;
+    this.state.monthlyQuotePromises = null;
 
-  papaparse.parse("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/D_VXUS.csv", {
-    download: true,
-    complete: function(data) {
-      dailyIntlStock = data;
-    }
-  });
-
-  papaparse.parse("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/D_BND.csv", {
-    download: true,
-    complete: function(data) {
-      dailyBond = data;
-      renderPage();
-    }
-  });
-
-  return (
-    <div className="App">
-      <header className="App-header">
-        <p id='status'>
-          Loading price data
-        </p>
-        <table>
-          <thead>
-            <tr>
-              <th>Dates</th>
-              <th>Stocks</th>
-              <th>IntlStocks</th>
-              <th>Bonds</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><div id='dates'>
-              </div></td>
-              <td><div id='stock'>
-              </div></td>
-              <td><div id='stockIntl'>
-              </div></td>
-              <td><div id='bond'>
-              </div></td>
-            </tr>
-            <tr>
-              <td><div id='Ddates'>
-              </div></td>
-              <td><div id='Dstock'>
-              </div></td>
-              <td><div id='DstockIntl'>
-              </div></td>
-              <td><div id='Dbond'>
-              </div></td>
-            </tr>
-          </tbody>
-        </table>
-      </header>
-    </div>
-  );
-}
-
-
-function renderPage() {
-  var status = document.getElementById('status');
-  var dates = document.getElementById('dates');
-  var stock = document.getElementById('stock');
-  var stockIntl = document.getElementById('stockIntl');
-  var bond = document.getElementById('bond');
-  if (monthlyStock != null && monthlyIntlStock != null && monthlyBond != null && dailyStock != null && dailyIntlStock != null && dailyBond != null)
-  {
-    dates.innerText = "";
-    stock.innerText = "VTI";
-    stockIntl.innerText = "VXUS";
-    bond.innerText = "BND";
-    status.textContent = "Daily prices";
-
-    var iStocks = 1;
-    var iStocksIntl = 1;
-    var iBonds = 1;
     var loop = true;
     while (loop) {
-      if (monthlyStock.data[iStocks].length === 1 
-        || monthlyIntlStock.data[iStocksIntl].length === 1 
-        || monthlyBond.data[iBonds].length === 1) {
+      if (this.state.monthlyQuotes[0][this.state.iStocks].length === 1 
+        || this.state.monthlyQuotes[1][this.state.iStocksIntl].length === 1 
+        || this.state.monthlyQuotes[2][this.state.iBonds].length === 1) {
           loop = false;
       } else {
-        var s = monthlyStock.data[iStocks][0];
-        var sI = monthlyIntlStock.data[iStocksIntl][0];
-        var b = monthlyBond.data[iBonds][0];
-
+        var s = this.state.monthlyQuotes[0][this.state.iStocks][0];
+        var sI = this.state.monthlyQuotes[1][this.state.iStocksIntl][0];
+        var b = this.state.monthlyQuotes[2][this.state.iBonds][0];
+  
         var max;
         if (s < sI) {
           max = sI;
@@ -134,38 +65,186 @@ function renderPage() {
           max = b;
         }
         
-        if (s < max) iStocks++;
-        if (sI < max) iStocksIntl++;
-        if (b < max) iBonds++;
-
+        if (s < max) this.state.iStocks++;
+        if (sI < max) this.state.iStocksIntl++;
+        if (b < max) this.state.iBonds++;
+  
         if (s === sI && sI === b) {
-          dates.innerText += "  " + monthlyStock.data[iStocks][0];
-          stock.innerText += "  " + monthlyStock.data[iStocks][1];
-          stockIntl.innerText += "  " + monthlyIntlStock.data[iStocksIntl][1];
-          bond.innerText += "  " + monthlyBond.data[iBonds][1];
-          iStocks++;
-          iStocksIntl++;
-          iBonds++;
+  
+          var date = this.state.monthlyQuotes[0][this.state.iStocks][0];
+          this.state.startYear = parseInt(date.substr(0,4));
+          this.state.startMonth = parseInt(date.substr(5,2));
+          // status.innerText = startYear + " " + startMonth + " " + iStocks + " " + iStocksIntl + " " + iBonds;
+          loop = false;
         }
       }
     }
+    this.state.statusMessage = "3fund Price Data";
+    this.setState(this.state.monthlyQuotes);
+  }
 
-    var Ddates = document.getElementById('Ddates');
-    var Dstock = document.getElementById('Dstock');
-    var DstockIntl = document.getElementById('DstockIntl');
-    var Dbond = document.getElementById('Dbond');
-    Ddates.innerText = "";
-    Dstock.innerText = "VTI";
-    DstockIntl.innerText = "VXUS";
-    Dbond.innerText = "BND";
-    var dailyLength = dailyStock.data.length;
-    for (var i = 1; i < dailyLength - 1; i++) {
-        Ddates.innerText += "  " + dailyStock.data[i][0];
-        Dstock.innerText += "  " + dailyStock.data[i][1];
-        DstockIntl.innerText += "  " + dailyIntlStock.data[i][1];
-        Dbond.innerText += "  " + dailyBond.data[i][1];
-    }
+  render () {
+    return  (this.state.monthlyQuotes !== null) && 
+      <div>
+        <header className="App-header">
+          <h3 id='status'>
+            {this.state.statusMessage}
+          </h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Growth</th>
+              </tr>
+            </thead>
+            <tbody>
+                <>{showYears(this.state)}</>
+            </tbody>
+          </table>
+          <div>&nbsp;</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Growth</th>
+              </tr>
+            </thead>
+            <tbody>
+                <>{showMonths(this.state)}</>
+            </tbody>
+          </table>
+          <div>&nbsp;</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Growth</th>
+              </tr>
+            </thead>
+            <tbody>
+                <>{showDays(this.state)}</>
+            </tbody>
+          </table>
+        </header>
+      </div>
+    ;
   }
 }
+
+function getPrice (data, year, month, fund) {
+  var i = (year - data.startYear) * 12 + (month - data.startMonth);
+  if (i + data.iStocks < 1) return null;
+  if (i + data.iStocks > data.monthlyQuotes[fund].length) return null;
+  return data.monthlyQuotes[fund][i + data.iStocks][1];
+}
+
+function getChange(data, yearA, monthA, yearB, monthB, fund) {
+  if (monthA === 1) {
+    monthA = 12;
+    yearA = yearA - 1;
+  } else {
+    monthA = monthA - 1;
+  }
+
+  var startPrice = getPrice(data, yearA, monthA, fund);
+  if (startPrice === null) return null;
+  var endPrice = getPrice(data, yearB, monthB, fund);
+  if (endPrice === null) return null;
+  var change = (endPrice - startPrice)/startPrice;
+  return change;
+}
+
+
+function getDayChange(data, yearA, monthA, dayIndex, fund) {
+  if (monthA === 1) {
+    monthA = 12;
+    yearA = yearA - 1;
+  } else {
+    monthA = monthA - 1;
+  }
+
+  var startPrice = getPrice(data, yearA, monthA, fund);
+  if (startPrice === null) return null;
+  var previousDayPrice = data.dailyQuotes[fund][dayIndex-1][1];
+  if (previousDayPrice === "close") previousDayPrice = startPrice;
+  var dayPrice = data.dailyQuotes[fund][dayIndex][1];
+  var change = (dayPrice - previousDayPrice)/startPrice;
+  return change;
+}
+
+function showYears (data) {
+  var assetStock = 2/3;
+  var assetStockIntl = .2;
+  var assetBond = 1/3;
+  var currentMonth = new Date().getMonth();
+  var currentYear = new Date().getFullYear();
+
+  var years = Array(currentYear - data.startYear);
+
+  for (var year = currentYear; year >= data.startYear; year--) {
+    var endMonth = year === currentYear ? currentMonth : 12;
+    var delta1 = getChange(data, year, 1, year, endMonth, 0);
+    var delta2 = getChange(data, year, 1, year, endMonth, 1);
+    var delta3 = getChange(data, year, 1, year, endMonth, 2);
+    var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
+      (assetStock * 100 * (assetStockIntl)) * delta2 + 
+      (assetBond * 100 * delta3);
+    composite = delta1 == null || delta2 == null || delta3 == null ? composite : null;
+    years[year-data.startYear] = new Array(2);
+    years[year-data.startYear][0] = year;
+    years[year-data.startYear][1] = composite;
+  }
+
+  return years.map( annum => <tr><td>{annum[0]}</td><td>{Number(annum[1]).toFixed(2)+"%"}</td></tr> );
+}
+
+function showMonths (data) {
+  var assetStock = 2/3;
+  var assetStockIntl = .2;
+  var assetBond = 1/3;
+  var currentMonth = new Date().getMonth();
+  var currentYear = new Date().getFullYear();
+  var months = Array(currentMonth);
+
+  for (var month = 1; month <= currentMonth + 1; month++) {
+    var delta1 = getChange(data, currentYear, month, currentYear, month, 0);
+    var delta2 = getChange(data, currentYear, month, currentYear, month, 1);
+    var delta3 = getChange(data, currentYear, month, currentYear, month, 2);
+    var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
+      (assetStock * 100 * (assetStockIntl)) * delta2 + 
+      (assetBond * 100 * delta3);
+    composite = delta1 == null || delta2 == null || delta3 == null ? composite : null;
+    months[month] = new Array(2);
+    months[month][0] = month+"/"+currentYear;
+    months[month][1] = composite;
+  }
+
+  return months.map( annum => <tr><td>{annum[0]}</td><td>{Number(annum[1]).toFixed(2)+"%"}</td></tr> );
+}
+
+function showDays (data) {
+  var assetStock = 2/3;
+  var assetStockIntl = .2;
+  var assetBond = 1/3;
+  var currentMonth = new Date().getMonth();
+  var currentYear = new Date().getFullYear();
+  var days = Array(currentMonth);
+
+  for (var dayIndex = 1; dayIndex < data.dailyQuotes[0].length - 1; dayIndex++) {
+    var delta1 = getDayChange(data, currentYear, currentMonth, dayIndex, 0);
+    var delta2 = getDayChange(data, currentYear, currentMonth, dayIndex, 1);
+    var delta3 = getDayChange(data, currentYear, currentMonth, dayIndex, 2);
+    var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
+      (assetStock * 100 * (assetStockIntl)) * delta2 + 
+      (assetBond * 100 * delta3);
+    composite = delta1 == null || delta2 == null || delta3 == null ? composite : null;
+    days[dayIndex] = new Array(2);
+    days[dayIndex][0] = data.dailyQuotes[0][dayIndex][0].substr(5);
+    days[dayIndex][1] = composite;
+  }
+
+  return days.map( annum => <tr><td>{annum[0]}</td><td>{Number(annum[1]).toFixed(2)+"%"}</td></tr> );
+}
+
 
 export default App;
