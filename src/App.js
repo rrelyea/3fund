@@ -9,7 +9,7 @@ class App extends React.Component {
     indexes: [1,1,1],
     startYear: 0,
     startMonth: 0,
-    statusMessage: "Loading price data",
+    statusMessage: "Loading prices",
     tickers: ['VTI', 'VXUS', 'BND'],
     allocations: [2/3, .2, 1/3]
   };
@@ -77,7 +77,7 @@ class App extends React.Component {
         }
       }
     }
-    this.state.statusMessage = "3fund Price Data";
+    this.state.statusMessage = "3fund Returns";
     this.setState(this.state.monthlyQuotes);
   }
 
@@ -188,16 +188,17 @@ function showYears (data) {
   var assetStock = data.allocations[0];
   var assetStockIntl = data.allocations[1];
   var assetBond = data.allocations[2];
-  var currentMonth = new Date().getMonth();
+  var currentMonth = new Date().getMonth() + 1;
   var currentYear = new Date().getFullYear();
 
   var years = Array(currentYear - data.startYear);
 
   for (var year = currentYear; year >= data.startYear; year--) {
     var endMonth = year === currentYear ? currentMonth : 12;
-    var delta1 = getChange(data, year, 1, year, endMonth, 0);
-    var delta2 = getChange(data, year, 1, year, endMonth, 1);
-    var delta3 = getChange(data, year, 1, year, endMonth, 2);
+    var startMonth = year === data.startYear ? data.startMonth + 1 : 1;
+    var delta1 = getChange(data, year, startMonth, year, endMonth, 0);
+    var delta2 = getChange(data, year, startMonth, year, endMonth, 1);
+    var delta3 = getChange(data, year, startMonth, year, endMonth, 2);
     var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
       (assetStock * 100 * (assetStockIntl)) * delta2 + 
       (assetBond * 100 * delta3);
@@ -238,7 +239,7 @@ function showDays (data) {
   var assetStock = data.allocations[0];
   var assetStockIntl = data.allocations[1];
   var assetBond = data.allocations[2];
-  var currentMonth = new Date().getMonth();
+  var currentMonth = new Date().getMonth() + 1;
   var currentYear = new Date().getFullYear();
   var days = Array(currentMonth);
   var dayCount = data.dailyQuotes[0].length - 2;
