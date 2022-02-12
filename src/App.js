@@ -143,7 +143,7 @@ class App extends React.Component {
           <div>
             <label htmlFor='fundType'>Fund Family:&nbsp;</label>
             <select id='fundType' value={this.state.type} onChange={(e) => handleChange(e)}>
-              {this.state.fundTypes.map((fundType,index) => 
+              {this.state.fundTypes.filter(fundType => fundType[0] !== '' && fundType[0] !== 'type').map((fundType,index) => 
                 <option key={index} value={fundType.length > 0 ? fundType[0] : "filler"}>{fundType.length > 0 ? fundType[0] : "filler"}</option>
               )} 
             </select>
