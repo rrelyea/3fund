@@ -121,6 +121,7 @@ class App extends React.Component {
     var bAllocation = parseInt(sbAllocations[1]) / 100;
     var iAllocation = intlAlloc !== null ? parseInt(intlAlloc) / 100 : 0;
     this.state.allocations = [sAllocation,iAllocation,bAllocation];
+
     const params = new URLSearchParams(window.location.search);
     params.set('aa', sAllocation*100 + "-" + bAllocation*100);
     if (iAllocation !== 0) params.set('intl', iAllocation*100);
@@ -153,16 +154,16 @@ class App extends React.Component {
       var bondAlloc = document.getElementById('bondAlloc');
       stockAlloc.innerText = e.target.value + '%';
       bondAlloc.innerText = 100 - e.target.value + '%';
-      var i = this.state.allocations[1];
+      var i = this.state.allocations[1] * 100;
       this.setAllocations(e.target.value, i, 100 - e.target.value);
     }
 
     const handleIntlSlide = (e) => {
       var intlAlloc = document.getElementById('intlAlloc');
       intlAlloc.innerText = e.target.value + '%';
-      var s = this.state.allocations[0];
-      var b = this.state.allocations[2];
-      this.setAllocations(s, e.target.value, b);
+      var s = this.state.allocations[0] * 100;
+      var b = this.state.allocations[2] * 100;
+      this.setAllocations(s.toString(), e.target.value, b.toString());
     }
     
     return  (this.state.monthlyQuotes !== null) && 
