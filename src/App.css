@@ -44,6 +44,10 @@ td.value {
   text-align: right
 }
 
+td.allocation {
+  text-align: center
+}
+
 thead {
   font-size: 14pt
 }

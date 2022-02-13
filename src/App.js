@@ -109,7 +109,7 @@ class App extends React.Component {
   harvestAllocations() {
     const params = new URLSearchParams(window.location.search);
     var aa = params.has('aa') ? params.get('aa') : '70-30';
-    var intl = params.has('intl') ? params.get('intl') : '0';
+    var intl = params.has('intl') ? params.get('intl') : '20';
     var sbAllocations = aa.split('-');
     this.setAllocations(sbAllocations[0], intl, sbAllocations[1])
   }
@@ -123,8 +123,25 @@ class App extends React.Component {
     this.state.allocations = [sAllocation,iAllocation,bAllocation];
 
     const params = new URLSearchParams(window.location.search);
-    params.set('aa', sAllocation*100 + "-" + bAllocation*100);
-    if (iAllocation !== 0) params.set('intl', iAllocation*100);
+
+    if (this.state.type !== "VanguardETF") {
+      params.set('type', this.state.type);
+    } else {
+      if (params.has('type')) params.delete('type');
+    }
+
+    if (sAllocation !== .7) {
+      params.set('aa', sAllocation*100 + "-" + bAllocation*100);
+    } else {
+      if (params.has('aa')) params.delete('aa');
+    }
+
+    if (iAllocation !== .2) {
+      params.set('intl', iAllocation*100);
+    } else {
+      if (params.has('intl')) params.delete('intl');
+    }
+
     window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
     this.setState(this.state.allocations);
   }
@@ -186,13 +203,13 @@ class App extends React.Component {
           <table>
             <tbody>
               <tr>
-                <td>
+                <td className='allocation'>
                 Stocks<br/><span id='stockAlloc'>{this.state.allocations[0]*100}%</span>
                 </td>
                 <td>
                   <input type="range" min="0" max="100" defaultValue={this.state.allocations[0]*100} onInput={(e)=>handleSlide(e)} />
                 </td>
-                <td>
+                <td className='allocation'>
                   Bonds<br/><span id='bondAlloc'>{this.state.allocations[2]*100}%</span>
                 </td>
                 </tr>
@@ -201,10 +218,10 @@ class App extends React.Component {
           <table>
             <tbody>
               <tr>
-                <td>
+                <td className='allocation'>
                 International<br/><span id='intlAlloc'>{this.state.allocations[1]*100}%</span>
                 </td>
-                <td>
+                <td className='allocation'>
                   <input type="range" min="0" max="100" defaultValue={this.state.allocations[1]*100} onInput={(e)=>handleIntlSlide(e)} />
                 </td>
               </tr>
