@@ -43,3 +43,7 @@ td.column {
 td.value {
   text-align: right
 }
+
+thead {
+  font-size: 14pt
+}

@@ -98,12 +98,34 @@ class App extends React.Component {
           }
         }
       }
-      this.state.statusMessage = "3fund Returns";
+      this.state.statusMessage = "Composite Returns";
     } else {
       this.state.statusMessage = "No data found";
     }
 
     this.setState(this.state);
+  }
+
+  harvestAllocations() {
+    const params = new URLSearchParams(window.location.search);
+    var aa = params.has('aa') ? params.get('aa') : '70-30';
+    var intl = params.has('intl') ? params.get('intl') : '0';
+    var sbAllocations = aa.split('-');
+    this.setAllocations(sbAllocations[0], intl, sbAllocations[1])
+  }
+
+  setAllocations(stockAlloc, intlAlloc, bondAlloc) {
+    var sbAllocations = [stockAlloc, bondAlloc];
+
+    var sAllocation = parseInt(sbAllocations[0]) / 100;
+    var bAllocation = parseInt(sbAllocations[1]) / 100;
+    var iAllocation = intlAlloc !== null ? parseInt(intlAlloc) / 100 : 0;
+    this.state.allocations = [sAllocation,iAllocation,bAllocation];
+    const params = new URLSearchParams(window.location.search);
+    params.set('aa', sAllocation*100 + "-" + bAllocation*100);
+    if (iAllocation !== 0) params.set('intl', iAllocation*100);
+    window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+    this.setState(this.state.allocations);
   }
 
   async componentDidMount () {
@@ -112,15 +134,7 @@ class App extends React.Component {
     this.state.type = params.has('type') ? params.get('type') : 'VanguardETF';
     var fundTypesPromise = this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/fundTypes.csv");
     this.state.fundTypes = await fundTypesPromise;
-
-    this.state.aa = params.has('aa') ? params.get('aa') : '70/30';
-    this.state.intl = params.has('intl') ? params.get('intl') : '0s';
-    var sbAllocations = this.state.aa.split('/');
-    var sAllocation = parseInt(sbAllocations[0]) / 100;
-    var bAllocation = parseInt(sbAllocations[1]) / 100;
-    var iAllocation = this.state.intl !== null ? parseInt(this.state.intl) / 100 : 0;
-    this.state.allocations = [sAllocation,iAllocation,bAllocation];
-
+    this.harvestAllocations();
     this.loadFundInfo();
   }
 
@@ -134,70 +148,114 @@ class App extends React.Component {
       this.render();
     }
 
+    const handleSlide = (e) => {
+      var stockAlloc = document.getElementById('stockAlloc');
+      var bondAlloc = document.getElementById('bondAlloc');
+      stockAlloc.innerText = e.target.value + '%';
+      bondAlloc.innerText = 100 - e.target.value + '%';
+      var i = this.state.allocations[1];
+      this.setAllocations(e.target.value, i, 100 - e.target.value);
+    }
+
+    const handleIntlSlide = (e) => {
+      var intlAlloc = document.getElementById('intlAlloc');
+      intlAlloc.innerText = e.target.value + '%';
+      var s = this.state.allocations[0];
+      var b = this.state.allocations[2];
+      this.setAllocations(s, e.target.value, b);
+    }
+    
     return  (this.state.monthlyQuotes !== null) && 
-      <div>
+      <div lang='en'>
         <header className="App-header">
-          <h3 id='status'>
-            {this.state.statusMessage}
-          </h3>
           <div>
-            <label htmlFor='fundType'>Fund Family:&nbsp;</label>
+
+            <label htmlFor='fundType'>Funds:&nbsp;</label>
             <select id='fundType' value={this.state.type} onChange={(e) => handleChange(e)}>
               {this.state.fundTypes.filter(fundType => fundType[0] !== '' && fundType[0] !== 'type').map((fundType,index) => 
                 <option key={index} value={fundType.length > 0 ? fundType[0] : "filler"}>{fundType.length > 0 ? fundType[0] : "filler"}</option>
               )} 
             </select>
           </div>
-          <div id='tickers'>
-            {this.state.tickers.join(" - ")}
+
+          <div id='tickers' lang='en'>
+            &nbsp;&nbsp;({this.state.tickers.join(" - ")})
           </div>
-          <div id='allocations'>
-            <span>
-            {this.state.allocations.map(allocation => <span>{(allocation * 100).toFixed(1)+"%  "}</span>  )}
-            </span>
-          </div>
+
           <table>
-            <tr>
-              <td className='column'>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Year</th>
-                      <th>%</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                      <>{showYears(this.state)}</>
-                  </tbody>
-                </table>
-              </td>
-              <td className='column'>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Month</th>
-                      <th>%</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                      <>{showMonths(this.state)}</>
-                  </tbody>
-                </table>
-              </td>
-              <td className='column'>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Day</th>
-                      <th>%</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                      <>{showDays(this.state)}</>
-                  </tbody>
-                </table>
-              </td>
-            </tr>
+            <tbody>
+              <tr>
+                <td>
+                Stocks<br/><span id='stockAlloc'>{this.state.allocations[0]*100}%</span>
+                </td>
+                <td>
+                  <input type="range" min="0" max="100" defaultValue={this.state.allocations[0]*100} onInput={(e)=>handleSlide(e)} />
+                </td>
+                <td>
+                  Bonds<br/><span id='bondAlloc'>{this.state.allocations[2]*100}%</span>
+                </td>
+                </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                International<br/><span id='intlAlloc'>{this.state.allocations[1]*100}%</span>
+                </td>
+                <td>
+                  <input type="range" min="0" max="100" defaultValue={this.state.allocations[1]*100} onInput={(e)=>handleIntlSlide(e)} />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <h4 id='status'>
+            {this.state.statusMessage}
+          </h4>
+          <table>
+            <tbody>
+              <tr>
+                <td className='column'>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Year</th>
+                        <th>%</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <>{showYears(this.state)}</>
+                    </tbody>
+                  </table>
+                </td>
+                <td className='column'>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Month</th>
+                        <th>%</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <>{showMonths(this.state)}</>
+                    </tbody>
+                  </table>
+                </td>
+                <td className='column'>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Day</th>
+                        <th>%</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <>{showDays(this.state)}</>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
           </table>
         </header>
       </div>
@@ -248,6 +306,7 @@ function getDayChange(data, yearA, monthA, dayIndex, fund) {
 
 function showYears (data) {
   if (data.monthlyQuotes[0] === null) return null;
+  if (data.allocations === undefined) return null;
 
   var assetStock = data.allocations[0];
   var assetStockIntl = data.allocations[1];
@@ -272,13 +331,14 @@ function showYears (data) {
     years[currentYear-year][1] = composite;
   }
 
-  return years.map( period => <tr><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(2)+"%"}</td></tr> );
+  return years.map( (period, index) => <tr key={index}><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
 }
 
 var month_names_short = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function showMonths (data) {
   if (data.monthlyQuotes[0] === null) return null;
+  if (data.allocations === undefined) return null;
 
   var assetStock = data.allocations[0];
   var assetStockIntl = data.allocations[1];
@@ -300,11 +360,12 @@ function showMonths (data) {
     months[currentMonth - month][1] = composite;
   }
 
-  return months.map( period => <tr><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(2)+"%"}</td></tr> );
+  return months.map( (period, index) => <tr key={index}><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
 }
 
 function showDays (data) {
   if (data.monthlyQuotes[0] === null) return null;
+  if (data.allocations === undefined) return null;
 
   var assetStock = data.allocations[0];
   var assetStockIntl = data.allocations[1];
@@ -327,7 +388,7 @@ function showDays (data) {
     days[dayCount - dayIndex][1] = composite;
   }
 
-  return days.map( period => <tr><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(2)+"%"}</td></tr> );
+  return days.map( (period, index) => <tr key={index}><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
 }
 
 export default App;
