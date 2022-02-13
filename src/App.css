@@ -2,10 +2,17 @@
   text-align: center;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-
+@media only screen and (min-width: 550px) and (max-width: 1089px) {
+  table {
+    margin: 5px
+  }
 }
 
+@media only screen and (min-width: 1089px) {
+  table {
+    margin: 10px
+  }
+}
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -19,11 +26,6 @@
 
 .App-link {
   color: #61dafb;
-}
-
-
-table {
-  margin: 8px
 }
 
 td.column {
