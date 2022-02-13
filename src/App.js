@@ -142,7 +142,11 @@ class App extends React.Component {
       if (params.has('intl')) params.delete('intl');
     }
 
-    window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+    if (Array.from(params).length > 0) {
+      window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+    } else {
+      window.history.replaceState({}, "", `${window.location.pathname}`);
+    }
     this.setState(this.state.allocations);
   }
 
@@ -159,9 +163,20 @@ class App extends React.Component {
   render () {
     const handleChange = (e) => {
       this.state.type = e.target.value;
-      const params = new URLSearchParams(window.location.search);
-      params.set('type', this.state.type);
-      window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+
+      var params = new URLSearchParams(window.location.search);
+      if (this.state.type === "VanguardETF") {
+        if (params.has('type')) params.delete('type');
+      } else {
+        params.set('type', this.state.type);
+      }
+
+      if (Array.from(params).length > 0) {
+        window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+      } else {
+        window.history.replaceState({}, "", `${window.location.pathname}`);
+      }
+      
       this.loadFundInfo();
       this.render();
     }
