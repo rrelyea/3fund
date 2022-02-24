@@ -252,7 +252,7 @@ class App extends React.Component {
                   <table>
                     <thead>
                       <tr>
-                        <th colSpan='2'>Year</th>
+                        <th colSpan='2'>Years</th>
                       </tr>
                     </thead>
                     <tbody>
