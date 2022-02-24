@@ -9,6 +9,9 @@ class App extends React.Component {
     startYear: 0,
     startMonth: 0,
     statusMessage: "Loading prices",
+    editMode: false,
+    currentYear: new Date().getFullYear(),
+    currentMonth: new Date().getMonth() + 1,
   };
 
   async toCsv(uri) {
@@ -32,7 +35,7 @@ class App extends React.Component {
     var i = 1;
     while (!eof) {
       if (this.state.fundTypes[i][0] !== '') {
-        if (this.state.fundTypes[i][0].toUpperCase() == this.state.type.toUpperCase()) {
+        if (this.state.fundTypes[i][0].toUpperCase() === this.state.type.toUpperCase()) {
           this.state.tickers = [this.state.fundTypes[i][1], this.state.fundTypes[i][2], this.state.fundTypes[i][3]];
         }
 
@@ -111,10 +114,10 @@ class App extends React.Component {
     var aa = params.has('aa') ? params.get('aa') : '70-30';
     var intl = params.has('intl') ? params.get('intl') : '20';
     var sbAllocations = aa.split('-');
-    this.setAllocations(sbAllocations[0], intl, sbAllocations[1])
+    this.setAllocations(sbAllocations[0], intl, sbAllocations[1], true)
   }
 
-  setAllocations(stockAlloc, intlAlloc, bondAlloc) {
+  setAllocations(stockAlloc, intlAlloc, bondAlloc, commit) {
     var sbAllocations = [stockAlloc, bondAlloc];
 
     var sAllocation = parseInt(sbAllocations[0]) / 100;
@@ -122,30 +125,32 @@ class App extends React.Component {
     var iAllocation = intlAlloc !== null ? parseInt(intlAlloc) / 100 : 0;
     this.state.allocations = [sAllocation,iAllocation,bAllocation];
 
-    const params = new URLSearchParams(window.location.search);
+    if (commit) {
+      const params = new URLSearchParams(window.location.search);
 
-    if (this.state.type !== "VanguardETF") {
-      params.set('type', this.state.type);
-    } else {
-      if (params.has('type')) params.delete('type');
-    }
+      if (this.state.type !== "VanguardETF") {
+        params.set('type', this.state.type);
+      } else {
+        if (params.has('type')) params.delete('type');
+      }
 
-    if (sAllocation !== .7) {
-      params.set('aa', sAllocation*100 + "-" + bAllocation*100);
-    } else {
-      if (params.has('aa')) params.delete('aa');
-    }
+      if (sAllocation !== .7) {
+        params.set('aa', sAllocation*100 + "-" + bAllocation*100);
+      } else {
+        if (params.has('aa')) params.delete('aa');
+      }
 
-    if (iAllocation !== .2) {
-      params.set('intl', iAllocation*100);
-    } else {
-      if (params.has('intl')) params.delete('intl');
-    }
+      if (iAllocation !== .2) {
+        params.set('intl', iAllocation*100);
+      } else {
+        if (params.has('intl')) params.delete('intl');
+      }
 
-    if (Array.from(params).length > 0) {
-      window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
-    } else {
-      window.history.replaceState({}, "", `${window.location.pathname}`);
+      if (Array.from(params).length > 0) {
+        window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+      } else {
+        window.history.replaceState({}, "", `${window.location.pathname}`);
+      }
     }
     this.setState(this.state.allocations);
   }
@@ -181,23 +186,27 @@ class App extends React.Component {
       this.render();
     }
 
-    const handleSlide = (e) => {
+    const handleSlide = (e,commit) => {
       var stockAlloc = document.getElementById('stockAlloc');
       var bondAlloc = document.getElementById('bondAlloc');
       stockAlloc.innerText = e.target.value + '%';
       bondAlloc.innerText = 100 - e.target.value + '%';
       var i = this.state.allocations[1] * 100;
-      this.setAllocations(e.target.value, i, 100 - e.target.value);
+      this.setAllocations(e.target.value, i, 100 - e.target.value, commit);
     }
 
-    const handleIntlSlide = (e) => {
+    const handleIntlSlide = (e,commit) => {
       var intlAlloc = document.getElementById('intlAlloc');
       intlAlloc.innerText = e.target.value + '%';
       var s = this.state.allocations[0] * 100;
       var b = this.state.allocations[2] * 100;
-      this.setAllocations(s.toString(), e.target.value, b.toString());
+      this.setAllocations(s.toString(), e.target.value, b.toString(), commit);
     }
     
+    const toggleEditMode = (e) => {
+      this.setState(this.state.editMode, () => this.state.editMode = !this.state.editMode );
+    }
+
     return  (this.state.monthlyQuotes !== null) && 
       <div lang='en'>
         <header className="App-header">
@@ -214,34 +223,25 @@ class App extends React.Component {
           <div id='tickers' lang='en'>
             &nbsp;&nbsp;({this.state.tickers.join(" - ")})
           </div>
-
-          <table>
-            <tbody>
-              <tr>
-                <td className='allocation'>
-                Stocks<br/><span id='stockAlloc'>{this.state.allocations[0]*100}%</span>
-                </td>
-                <td>
-                  <input type="range" min="0" max="100" defaultValue={this.state.allocations[0]*100} onInput={(e)=>handleSlide(e)} />
-                </td>
-                <td className='allocation'>
-                  Bonds<br/><span id='bondAlloc'>{this.state.allocations[2]*100}%</span>
-                </td>
-                </tr>
-            </tbody>
-          </table>
-          <table>
-            <tbody>
-              <tr>
-                <td className='allocation'>
-                International<br/><span id='intlAlloc'>{this.state.allocations[1]*100}%</span>
-                </td>
-                <td className='allocation'>
-                  <input type="range" min="0" max="100" defaultValue={this.state.allocations[1]*100} onInput={(e)=>handleIntlSlide(e)} />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div className='container'>
+            <span className='allocation item item-1'>
+            Stocks: <span id='stockAlloc'>{this.state.allocations[0]*100}%</span>
+            </span>
+            <span className='item item-2'>
+              {this.state.editMode ? <input type="range" min="0" max="100" defaultValue={this.state.allocations[0]*100} onInput={(e)=>handleSlide(e,false)} onChange={(e)=>handleSlide(e,true)} /> : <span className='slash'>&nbsp;/&nbsp;</span> }
+            </span>
+            <span className='allocation item item-3'>
+              Bonds: <span id='bondAlloc'>{this.state.allocations[2]*100}%</span>
+            </span>
+            <button className='editButton' onClick={(e)=>{toggleEditMode(e)}}>edit</button>
+            <br/>
+            <span className='allocation'>
+            International: <span id='intlAlloc'>{this.state.allocations[1]*100}%</span>
+            </span>
+            <span className='allocation'>
+              {this.state.editMode ? <input type="range" min="0" max="100" defaultValue={this.state.allocations[1]*100} onInput={(e)=>handleIntlSlide(e,false)} onChange={(e)=>handleIntlSlide(e,true)} /> : false }
+            </span>
+          </div> 
           <h4 id='status'>
             {this.state.statusMessage}
           </h4>
@@ -252,8 +252,7 @@ class App extends React.Component {
                   <table>
                     <thead>
                       <tr>
-                        <th>Year</th>
-                        <th>%</th>
+                        <th colSpan='2'>Year</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -265,8 +264,7 @@ class App extends React.Component {
                   <table>
                     <thead>
                       <tr>
-                        <th>Month</th>
-                        <th>%</th>
+                        <th colSpan='2'>{this.state.currentYear}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -278,8 +276,7 @@ class App extends React.Component {
                   <table>
                     <thead>
                       <tr>
-                        <th>Day</th>
-                        <th>%</th>
+                        <th colSpan='2'>{month_names_short[this.state.currentMonth - 1] + " " + this.state.currentYear}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -344,13 +341,11 @@ function showYears (data) {
   var assetStock = data.allocations[0];
   var assetStockIntl = data.allocations[1];
   var assetBond = data.allocations[2];
-  var currentMonth = new Date().getMonth() + 1;
-  var currentYear = new Date().getFullYear();
 
-  var years = Array(currentYear - data.startYear);
+  var years = Array(data.currentYear - data.startYear);
 
-  for (var year = currentYear; year >= data.startYear; year--) {
-    var endMonth = year === currentYear ? currentMonth : 12;
+  for (var year = data.currentYear; year >= data.startYear; year--) {
+    var endMonth = year === data.currentYear ? data.currentMonth : 12;
     var startMonth = year === data.startYear ? data.startMonth + 1 : 1;
     var delta1 = getChange(data, year, startMonth, year, endMonth, 0);
     var delta2 = getChange(data, year, startMonth, year, endMonth, 1);
@@ -359,9 +354,9 @@ function showYears (data) {
       (assetStock * 100 * (assetStockIntl)) * delta2 + 
       (assetBond * 100 * delta3);
     composite = delta1 === null || delta2 === null || delta3 === null ? null : composite;
-    years[currentYear-year] = new Array(2);
-    years[currentYear-year][0] = year.toString().substr(2);
-    years[currentYear-year][1] = composite;
+    years[data.currentYear-year] = new Array(2);
+    years[data.currentYear-year][0] = year.toString().substr(2);
+    years[data.currentYear-year][1] = composite;
   }
 
   return years.map( (period, index) => <tr key={index}><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
@@ -376,21 +371,19 @@ function showMonths (data) {
   var assetStock = data.allocations[0];
   var assetStockIntl = data.allocations[1];
   var assetBond = data.allocations[2];
-  var currentMonth = new Date().getMonth() + 1;
-  var currentYear = new Date().getFullYear();
-  var months = Array(currentMonth);
+  var months = Array(data.currentMonth);
   
-  for (var month = currentMonth; month > 0; month--) {
-    var delta1 = getChange(data, currentYear, month, currentYear, month, 0);
-    var delta2 = getChange(data, currentYear, month, currentYear, month, 1);
-    var delta3 = getChange(data, currentYear, month, currentYear, month, 2);
+  for (var month = data.currentMonth; month > 0; month--) {
+    var delta1 = getChange(data, data.currentYear, month, data.currentYear, month, 0);
+    var delta2 = getChange(data, data.currentYear, month, data.currentYear, month, 1);
+    var delta3 = getChange(data, data.currentYear, month, data.currentYear, month, 2);
     var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
       (assetStock * 100 * (assetStockIntl)) * delta2 + 
       (assetBond * 100 * delta3);
     composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
-    months[currentMonth - month] = new Array(2);
-    months[currentMonth - month][0] = month_names_short[month-1];
-    months[currentMonth - month][1] = composite;
+    months[data.currentMonth - month] = new Array(2);
+    months[data.currentMonth - month][0] = month_names_short[month-1];
+    months[data.currentMonth - month][1] = composite;
   }
 
   return months.map( (period, index) => <tr key={index}><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
@@ -403,15 +396,13 @@ function showDays (data) {
   var assetStock = data.allocations[0];
   var assetStockIntl = data.allocations[1];
   var assetBond = data.allocations[2];
-  var currentMonth = new Date().getMonth() + 1;
-  var currentYear = new Date().getFullYear();
-  var days = Array(currentMonth);
+  var days = Array(data.currentMonth);
   var dayCount = data.dailyQuotes[0].length - 2;
 
   for (var dayIndex = dayCount; dayIndex >= 1 ; dayIndex--) {
-    var delta1 = getDayChange(data, currentYear, currentMonth, dayIndex, 0);
-    var delta2 = getDayChange(data, currentYear, currentMonth, dayIndex, 1);
-    var delta3 = getDayChange(data, currentYear, currentMonth, dayIndex, 2);
+    var delta1 = getDayChange(data, data.currentYear, data.currentMonth, dayIndex, 0);
+    var delta2 = getDayChange(data, data.currentYear, data.currentMonth, dayIndex, 1);
+    var delta3 = getDayChange(data, data.currentYear, data.currentMonth, dayIndex, 2);
     var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
       (assetStock * 100 * (assetStockIntl)) * delta2 + 
       (assetBond * 100 * delta3);

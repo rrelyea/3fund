@@ -24,6 +24,11 @@
   color: white;
 }
 
+.container {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .App-link {
   color: #61dafb;
 }
@@ -37,9 +42,19 @@ td.value {
 }
 
 td.allocation {
-  text-align: center
+  text-align: center;
+  display: inline-block;
 }
 
 thead {
   font-size: 12pt
 }
+
+span.slash {
+  font-size: 24pt;
+}
+
+.editButton {
+  margin-left: 40px;
+}
+
