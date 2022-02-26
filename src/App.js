@@ -12,7 +12,10 @@ class App extends React.Component {
     editMode: false,
     currentYear: new Date().getFullYear(),
     currentMonth: new Date().getMonth() + 1,
+    showMonth: 0,
+    showYear: 0,
   };
+  month_names_short = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   async toCsv(uri) {
     return new Promise((resolve, reject) => {
@@ -155,33 +158,47 @@ class App extends React.Component {
     this.setState(this.state.allocations);
   }
 
-  async componentDidMount () {
-    const params = new URLSearchParams(window.location.search);
+  getParam(params, paramName, defaultValue) {
+    return params.has(paramName) ? params.get(paramName) : defaultValue
+  }
 
-    this.state.type = params.has('type') ? params.get('type') : 'VanguardETF';
+  setParam (value, params, paramName, defaultValue) {
+    if (value === defaultValue) {
+      if (params.has(paramName)) params.delete(paramName);
+    } else {
+      params.set(paramName, value);
+    }
+  }
+
+  async harvestParams () {
+    const params = new URLSearchParams(window.location.search);
+    this.state.type = this.getParam(params, 'type', 'VanguardETF');
+    this.state.showYear = this.getParam(params, 'year', this.state.currentYear);
     var fundTypesPromise = this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/fundTypes.csv");
     this.state.fundTypes = await fundTypesPromise;
     this.harvestAllocations();
+  }
+
+  setParams() {
+    var params = new URLSearchParams(window.location.search);
+    this.setParam(this.state.type, params, 'type', 'VanguardETF');
+    this.setParam(this.state.showYear, params, 'year', this.state.currentYear);
+    if (Array.from(params).length > 0) {
+      window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+    } else {
+      window.history.replaceState({}, "", `${window.location.pathname}`);
+    }
+  }
+
+  async componentDidMount () {
+    await this.harvestParams();
     this.loadFundInfo();
   }
 
   render () {
     const handleChange = (e) => {
       this.state.type = e.target.value;
-
-      var params = new URLSearchParams(window.location.search);
-      if (this.state.type === "VanguardETF") {
-        if (params.has('type')) params.delete('type');
-      } else {
-        params.set('type', this.state.type);
-      }
-
-      if (Array.from(params).length > 0) {
-        window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
-      } else {
-        window.history.replaceState({}, "", `${window.location.pathname}`);
-      }
-      
+      this.setParams();
       this.loadFundInfo();
       this.render();
     }
@@ -256,7 +273,7 @@ class App extends React.Component {
                       </tr>
                     </thead>
                     <tbody>
-                        <>{showYears(this.state)}</>
+                        <>{this.showYears()}</>
                     </tbody>
                   </table>
                 </td>
@@ -264,11 +281,11 @@ class App extends React.Component {
                   <table>
                     <thead>
                       <tr>
-                        <th colSpan='2'>{this.state.currentYear}</th>
+                        <th colSpan='2'>{this.state.showYear}</th>
                       </tr>
                     </thead>
                     <tbody>
-                        <>{showMonths(this.state)}</>
+                        <>{this.showMonths()}</>
                     </tbody>
                   </table>
                 </td>
@@ -276,11 +293,11 @@ class App extends React.Component {
                   <table>
                     <thead>
                       <tr>
-                        <th colSpan='2'>{month_names_short[this.state.currentMonth - 1] + " " + this.state.currentYear}</th>
+                        <th colSpan='2'>{this.showDaysHeader()}</th>
                       </tr>
                     </thead>
                     <tbody>
-                        <>{showDays(this.state)}</>
+                        <>{this.showDays()}</>
                     </tbody>
                   </table>
                 </td>
@@ -291,128 +308,143 @@ class App extends React.Component {
       </div>
     ;
   }
-}
 
-function getPrice (data, year, month, fund) {
-  var i = (year - data.startYear) * 12 + (month - data.startMonth);
-  if (i + data.indexes[fund] < 1) return null;
-  if (i + data.indexes[fund] > data.monthlyQuotes[fund].length) return null;
-  return data.monthlyQuotes[fund][i + data.indexes[fund]][1];
-}
-
-function getChange(data, yearA, monthA, yearB, monthB, fund) {
-  if (monthA === 1) {
-    monthA = 12;
-    yearA = yearA - 1;
-  } else {
-    monthA = monthA - 1;
+  getPrice (data, year, month, fund) {
+    var i = (year - data.startYear) * 12 + (month - data.startMonth);
+    if (i + data.indexes[fund] < 1) return null;
+    if (i + data.indexes[fund] > data.monthlyQuotes[fund].length) return null;
+    return data.monthlyQuotes[fund][i + data.indexes[fund]][1];
   }
 
-  var startPrice = getPrice(data, yearA, monthA, fund);
-  if (startPrice === null) return null;
-  var endPrice = getPrice(data, yearB, monthB, fund);
-  if (endPrice === null) return null;
-  var change = (endPrice - startPrice)/startPrice;
-  return change;
-}
+  getChange(data, yearA, monthA, yearB, monthB, fund) {
+    if (monthA === 1) {
+      monthA = 12;
+      yearA = yearA - 1;
+    } else {
+      monthA = monthA - 1;
+    }
 
-
-function getDayChange(data, yearA, monthA, dayIndex, fund) {
-  if (monthA === 1) {
-    monthA = 12;
-    yearA = yearA - 1;
-  } else {
-    monthA = monthA - 1;
+    var startPrice = this.getPrice(data, yearA, monthA, fund);
+    if (startPrice === null) return null;
+    var endPrice = this.getPrice(data, yearB, monthB, fund);
+    if (endPrice === null) return null;
+    var change = (endPrice - startPrice)/startPrice;
+    return change;
   }
 
-  var startPrice = getPrice(data, yearA, monthA, fund);
-  if (startPrice === null) return null;
-  var previousDayPrice = data.dailyQuotes[fund][dayIndex-1][1];
-  if (previousDayPrice === "close") previousDayPrice = startPrice;
-  var dayPrice = data.dailyQuotes[fund][dayIndex][1];
-  var change = (dayPrice - previousDayPrice)/startPrice;
-  return change;
-}
 
-function showYears (data) {
-  if (data.monthlyQuotes[0] === null) return null;
-  if (data.allocations === undefined) return null;
+  getDayChange(data, yearA, monthA, dayIndex, fund) {
+    if (monthA === 1) {
+      monthA = 12;
+      yearA = yearA - 1;
+    } else {
+      monthA = monthA - 1;
+    }
 
-  var assetStock = data.allocations[0];
-  var assetStockIntl = data.allocations[1];
-  var assetBond = data.allocations[2];
-
-  var years = Array(data.currentYear - data.startYear);
-
-  for (var year = data.currentYear; year >= data.startYear; year--) {
-    var endMonth = year === data.currentYear ? data.currentMonth : 12;
-    var startMonth = year === data.startYear ? data.startMonth + 1 : 1;
-    var delta1 = getChange(data, year, startMonth, year, endMonth, 0);
-    var delta2 = getChange(data, year, startMonth, year, endMonth, 1);
-    var delta3 = getChange(data, year, startMonth, year, endMonth, 2);
-    var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
-      (assetStock * 100 * (assetStockIntl)) * delta2 + 
-      (assetBond * 100 * delta3);
-    composite = delta1 === null || delta2 === null || delta3 === null ? null : composite;
-    years[data.currentYear-year] = new Array(2);
-    years[data.currentYear-year][0] = year.toString().substr(2);
-    years[data.currentYear-year][1] = composite;
+    var startPrice = this.getPrice(data, yearA, monthA, fund);
+    if (startPrice === null) return null;
+    var previousDayPrice = data.dailyQuotes[fund][dayIndex-1][1];
+    if (previousDayPrice === "close") previousDayPrice = startPrice;
+    var dayPrice = data.dailyQuotes[fund][dayIndex][1];
+    var change = (dayPrice - previousDayPrice)/startPrice;
+    return change;
   }
 
-  return years.map( (period, index) => <tr key={index}><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
-}
+  showYears () {
+    const changeYear = (year) => {
+      //TODO: what about years < 2000
+      this.state.showYear = Number(year) + 2000;
+      this.setParams();
+      this.harvestParams();
+      this.render();
+    }
 
-var month_names_short = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    if (this.state.monthlyQuotes[0] === null) return null;
+    if (this.state.allocations === undefined) return null;
 
-function showMonths (data) {
-  if (data.monthlyQuotes[0] === null) return null;
-  if (data.allocations === undefined) return null;
+    var assetStock = this.state.allocations[0];
+    var assetStockIntl = this.state.allocations[1];
+    var assetBond = this.state.allocations[2];
 
-  var assetStock = data.allocations[0];
-  var assetStockIntl = data.allocations[1];
-  var assetBond = data.allocations[2];
-  var months = Array(data.currentMonth);
-  
-  for (var month = data.currentMonth; month > 0; month--) {
-    var delta1 = getChange(data, data.currentYear, month, data.currentYear, month, 0);
-    var delta2 = getChange(data, data.currentYear, month, data.currentYear, month, 1);
-    var delta3 = getChange(data, data.currentYear, month, data.currentYear, month, 2);
-    var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
-      (assetStock * 100 * (assetStockIntl)) * delta2 + 
-      (assetBond * 100 * delta3);
-    composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
-    months[data.currentMonth - month] = new Array(2);
-    months[data.currentMonth - month][0] = month_names_short[month-1];
-    months[data.currentMonth - month][1] = composite;
+    var years = Array(this.state.currentYear - this.state.startYear);
+
+    for (var year = this.state.currentYear; year >= this.state.startYear; year--) {
+      var endMonth = year === this.state.currentYear ? this.state.currentMonth : 12;
+      var startMonth = year === this.state.startYear ? this.state.startMonth + 1 : 1;
+      var delta1 = this.getChange(this.state, year, startMonth, year, endMonth, 0);
+      var delta2 = this.getChange(this.state, year, startMonth, year, endMonth, 1);
+      var delta3 = this.getChange(this.state, year, startMonth, year, endMonth, 2);
+      var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
+        (assetStock * 100 * (assetStockIntl)) * delta2 + 
+        (assetBond * 100 * delta3);
+      composite = delta1 === null || delta2 === null || delta3 === null ? null : composite;
+      years[this.state.currentYear-year] = new Array(2);
+      years[this.state.currentYear-year][0] = year.toString().substr(2);
+      years[this.state.currentYear-year][1] = composite;
+    }
+
+    return years.map( (period, index) => <tr key={index}><td><button className='yearButton' onClick={()=>changeYear(period[0])}>{period[0]}</button></td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
   }
 
-  return months.map( (period, index) => <tr key={index}><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
-}
+  showMonths () {
+    if (this.state.monthlyQuotes[0] === null) return null;
+    if (this.state.allocations === undefined) return null;
 
-function showDays (data) {
-  if (data.monthlyQuotes[0] === null) return null;
-  if (data.allocations === undefined) return null;
+    var assetStock = this.state.allocations[0];
+    var assetStockIntl = this.state.allocations[1];
+    var assetBond = this.state.allocations[2];
+    var showMonth = this.state.showYear === this.state.currentYear ? this.state.currentMonth : 12;
+    var months = Array(showMonth);
+    
+    for (var month = showMonth; month > 0; month--) {
+      var delta1 = this.getChange(this.state, this.state.showYear, month, this.state.showYear, month, 0);
+      var delta2 = this.getChange(this.state, this.state.showYear, month, this.state.showYear, month, 1);
+      var delta3 = this.getChange(this.state, this.state.showYear, month, this.state.showYear, month, 2);
+      var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
+        (assetStock * 100 * (assetStockIntl)) * delta2 + 
+        (assetBond * 100 * delta3);
+      composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
+      months[showMonth - month] = new Array(2);
+      months[showMonth - month][0] = this.month_names_short[month-1];
+      months[showMonth - month][1] = composite;
+    }
 
-  var assetStock = data.allocations[0];
-  var assetStockIntl = data.allocations[1];
-  var assetBond = data.allocations[2];
-  var days = Array(data.currentMonth);
-  var dayCount = data.dailyQuotes[0].length - 2;
-
-  for (var dayIndex = dayCount; dayIndex >= 1 ; dayIndex--) {
-    var delta1 = getDayChange(data, data.currentYear, data.currentMonth, dayIndex, 0);
-    var delta2 = getDayChange(data, data.currentYear, data.currentMonth, dayIndex, 1);
-    var delta3 = getDayChange(data, data.currentYear, data.currentMonth, dayIndex, 2);
-    var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
-      (assetStock * 100 * (assetStockIntl)) * delta2 + 
-      (assetBond * 100 * delta3);
-    composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
-    days[dayCount - dayIndex] = new Array(2);
-    days[dayCount - dayIndex][0] = data.dailyQuotes[0][dayIndex][0].substr(8);
-    days[dayCount - dayIndex][1] = composite;
+    return months.map( (period, index) => <tr key={index}><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
   }
 
-  return days.map( (period, index) => <tr key={index}><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
+  showDaysHeader () {
+    if (this.state.currentYear === this.state.showYear)
+      return this.month_names_short[this.state.currentMonth - 1] + " " + this.state.currentYear;
+    else
+      return false;
+  }
+
+  showDays () {
+    if (this.state.showYear !== this.state.currentYear) return null;
+    if (this.state.monthlyQuotes[0] === null) return null;
+    if (this.state.allocations === undefined) return null;
+
+    var assetStock = this.state.allocations[0];
+    var assetStockIntl = this.state.allocations[1];
+    var assetBond = this.state.allocations[2];
+    var days = Array(this.state.currentMonth);
+    var dayCount = this.state.dailyQuotes[0].length - 2;
+
+    for (var dayIndex = dayCount; dayIndex >= 1 ; dayIndex--) {
+      var delta1 = this.getDayChange(this.state, this.state.currentYear, this.state.currentMonth, dayIndex, 0);
+      var delta2 = this.getDayChange(this.state, this.state.currentYear, this.state.currentMonth, dayIndex, 1);
+      var delta3 = this.getDayChange(this.state, this.state.currentYear, this.state.currentMonth, dayIndex, 2);
+      var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
+        (assetStock * 100 * (assetStockIntl)) * delta2 + 
+        (assetBond * 100 * delta3);
+      composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
+      days[dayCount - dayIndex] = new Array(2);
+      days[dayCount - dayIndex][0] = this.state.dailyQuotes[0][dayIndex][0].substr(8);
+      days[dayCount - dayIndex][1] = composite;
+    }
+
+    return days.map( (period, index) => <tr key={index}><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
+  }
 }
 
 export default App;
