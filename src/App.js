@@ -265,7 +265,6 @@ class App extends React.Component {
             <span className='allocation item item-3'>
               Bonds: <span id='bondAlloc'>{this.state.allocations[2]*100}%</span>
             </span>
-            <button className='editButton' onClick={(e)=>{toggleEditMode(e)}}>{this.state.editMode ? "save" : "edit"}</button>
             <br/>
             <span className='allocation'>
             International: <span id='intlAlloc'>{this.state.allocations[1]*100}%</span>
@@ -273,6 +272,7 @@ class App extends React.Component {
             <span className='allocation'>
               {this.state.editMode ? <input type="range" min="0" max="100" defaultValue={this.state.allocations[1]*100} onInput={(e)=>handleIntlSlide(e,false)} onChange={(e)=>handleIntlSlide(e,true)} /> : false }
             </span>
+            <button className='editButton' onClick={(e)=>{toggleEditMode(e)}}>{this.state.editMode ? "save" : "edit"}</button>
           </div> 
           <h4 id='status'>
             {this.state.statusMessage}
