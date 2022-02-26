@@ -203,25 +203,40 @@ class App extends React.Component {
       this.render();
     }
 
-    const handleSlide = (e,commit) => {
+    const handleSlide = (e) => {
       var stockAlloc = document.getElementById('stockAlloc');
       var bondAlloc = document.getElementById('bondAlloc');
+      var stock = e.target.value;
+      var bond = 100 - stock;
       stockAlloc.innerText = e.target.value + '%';
       bondAlloc.innerText = 100 - e.target.value + '%';
       var i = this.state.allocations[1] * 100;
-      this.setAllocations(e.target.value, i, 100 - e.target.value, commit);
+      this.setAllocations(stock, i, bond, true);
     }
 
-    const handleIntlSlide = (e,commit) => {
+    const handleIntlSlide = (e) => {
       var intlAlloc = document.getElementById('intlAlloc');
       intlAlloc.innerText = e.target.value + '%';
       var s = this.state.allocations[0] * 100;
       var b = this.state.allocations[2] * 100;
-      this.setAllocations(s.toString(), e.target.value, b.toString(), commit);
+      this.setAllocations(s.toString(), e.target.value, b.toString(), false);
     }
     
     const toggleEditMode = (e) => {
-      this.setState(this.state.editMode, () => this.state.editMode = !this.state.editMode );
+      this.state.editMode = !this.state.editMode;
+
+      if (!this.state.editMode) {
+        var stockAlloc = document.getElementById('stockAlloc');
+        var bondAlloc = document.getElementById('bondAlloc');
+
+        var stock = Number(stockAlloc.innerText.substring(0, stockAlloc.innerText.length - 1));
+        var bond = Number(bondAlloc.innerText.substring(0, bondAlloc.innerText.length - 1));
+        var i = this.state.allocations[1] * 100;
+        this.setAllocations(stock, i, bond, true);
+      }
+
+      this.setState(this.state);
+      this.render();
     }
 
     return  (this.state.monthlyQuotes !== null) && 
@@ -250,7 +265,7 @@ class App extends React.Component {
             <span className='allocation item item-3'>
               Bonds: <span id='bondAlloc'>{this.state.allocations[2]*100}%</span>
             </span>
-            <button className='editButton' onClick={(e)=>{toggleEditMode(e)}}>edit</button>
+            <button className='editButton' onClick={(e)=>{toggleEditMode(e)}}>{this.state.editMode ? "save" : "edit"}</button>
             <br/>
             <span className='allocation'>
             International: <span id='intlAlloc'>{this.state.allocations[1]*100}%</span>
