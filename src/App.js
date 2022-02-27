@@ -243,18 +243,17 @@ class App extends React.Component {
       <div lang='en'>
         <header className="App-header">
           <div>
-
-            <label htmlFor='fundType'>Funds:&nbsp;</label>
             <select id='fundType' value={this.state.type} onChange={(e) => handleChange(e)}>
               {this.state.fundTypes.filter(fundType => fundType[0] !== '' && fundType[0] !== 'type').map((fundType,index) => 
                 <option key={index} value={fundType.length > 0 ? fundType[0] : "filler"}>{fundType.length > 0 ? fundType[0] : "filler"}</option>
               )} 
             </select>
+            <span id='tickers' lang='en'>
+            &nbsp;&nbsp;({this.state.tickers.join(" - ")})
+            </span>
           </div>
 
-          <div id='tickers' lang='en'>
-            &nbsp;&nbsp;({this.state.tickers.join(" - ")})
-          </div>
+
           <div className='container'>
             <span className='allocation item item-1'>
             Stocks: <span id='stockAlloc'>{this.state.allocations[0]*100}%</span>
