@@ -273,9 +273,7 @@ class App extends React.Component {
             </span>
             <button className='editButton' onClick={(e)=>{toggleEditMode(e)}}>{this.state.editMode ? "save" : "edit"}</button>
           </div> 
-          <h4 id='status'>
-            {this.state.statusMessage}
-          </h4>
+          {this.state.statusMessage !== null ? <h4 id='status'>{this.state.statusMessage}</h4> : null }
           <table>
             <tbody>
               <tr>
@@ -437,7 +435,7 @@ class App extends React.Component {
     if (this.state.showYear !== this.state.currentYear ||
       this.state.monthlyQuotes[0] === null ||
       this.state.allocations === undefined) {
-        return <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>;
+        return <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>;
     }
 
     var assetStock = this.state.allocations[0];
