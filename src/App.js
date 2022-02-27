@@ -104,7 +104,7 @@ class App extends React.Component {
           }
         }
       }
-      this.state.statusMessage = "Composite Returns";
+      this.state.statusMessage = null;
     } else {
       this.state.statusMessage = "No data found";
     }
@@ -435,9 +435,11 @@ class App extends React.Component {
   }
 
   showDays () {
-    if (this.state.showYear !== this.state.currentYear) return null;
-    if (this.state.monthlyQuotes[0] === null) return null;
-    if (this.state.allocations === undefined) return null;
+    if (this.state.showYear !== this.state.currentYear ||
+      this.state.monthlyQuotes[0] === null ||
+      this.state.allocations === undefined) {
+        return <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>;
+    }
 
     var assetStock = this.state.allocations[0];
     var assetStockIntl = this.state.allocations[1];
