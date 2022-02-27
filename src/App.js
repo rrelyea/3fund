@@ -437,7 +437,7 @@ class App extends React.Component {
     if (this.state.showYear !== this.state.currentYear ||
       this.state.monthlyQuotes[0] === null ||
       this.state.allocations === undefined) {
-        return <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>;
+        return <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>;
     }
 
     var assetStock = this.state.allocations[0];
