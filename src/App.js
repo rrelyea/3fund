@@ -384,6 +384,10 @@ class App extends React.Component {
       var endMonth = year === this.state.currentYear ? this.state.currentMonth : 12;
       var startMonth = year === this.state.startYear ? this.state.startMonth + 1 : 1;
       var delta1 = this.getChange(this.state, year, startMonth, year, endMonth, 0);
+      if (isNaN(delta1)) {
+        endMonth = endMonth - 1;
+        delta1 = this.getChange(this.state, year, startMonth, year, endMonth, 0);
+      }
       var delta2 = this.getChange(this.state, year, startMonth, year, endMonth, 1);
       var delta3 = this.getChange(this.state, year, startMonth, year, endMonth, 2);
       var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
@@ -418,30 +422,37 @@ class App extends React.Component {
       composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
       months[showMonth - month] = new Array(2);
       months[showMonth - month][0] = this.month_names_short[month-1];
-      months[showMonth - month][1] = composite;
+      months[showMonth - month][1] = isNaN(composite) ? "---" : Number(composite).toFixed(1)+"%";
     }
 
-    return months.map( (period, index) => <tr key={index}><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
+    return months.map( (period, index) => period[1] === "---" ? false : <tr key={index}><td>{period[0]}</td><td className='value'>{period[1]}</td></tr> );
   }
 
+  days = Array(this.state.currentMonth);
   showDaysHeader () {
-    if (this.state.currentYear === this.state.showYear)
-      return this.month_names_short[this.state.currentMonth - 1] + " " + this.state.currentYear;
+    this.calculateDays();
+    if (this.state.currentYear === this.state.showYear) {
+      var month = this.state.currentMonth - 1;
+      if (this.days[0][0] > new Date().getDay()) {
+        month = month - 1;
+      }
+      
+      return this.month_names_short[month] + " " + this.state.currentYear;
+    }
     else
       return false;
   }
 
-  showDays () {
+  calculateDays () {  
     if (this.state.showYear !== this.state.currentYear ||
       this.state.monthlyQuotes[0] === null ||
       this.state.allocations === undefined) {
-        return <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>;
+        return;
     }
 
     var assetStock = this.state.allocations[0];
     var assetStockIntl = this.state.allocations[1];
     var assetBond = this.state.allocations[2];
-    var days = Array(this.state.currentMonth);
     var dayCount = this.state.dailyQuotes[0].length - 2;
 
     for (var dayIndex = dayCount; dayIndex >= 1 ; dayIndex--) {
@@ -452,12 +463,20 @@ class App extends React.Component {
         (assetStock * 100 * (assetStockIntl)) * delta2 + 
         (assetBond * 100 * delta3);
       composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
-      days[dayCount - dayIndex] = new Array(2);
-      days[dayCount - dayIndex][0] = this.state.dailyQuotes[0][dayIndex][0].substr(8);
-      days[dayCount - dayIndex][1] = composite;
+      this.days[dayCount - dayIndex] = new Array(2);
+      this.days[dayCount - dayIndex][0] = this.state.dailyQuotes[0][dayIndex][0].substr(8);
+      this.days[dayCount - dayIndex][1] = composite;
+    }
+  }
+
+  showDays () {
+    if (this.state.showYear !== this.state.currentYear ||
+      this.state.monthlyQuotes[0] === null ||
+      this.state.allocations === undefined) {
+        return <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>;
     }
 
-    return days.map( (period, index) => <tr key={index}><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
+    return this.days.map( (period, index) => <tr key={index}><td>{period[0]}</td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
   }
 }
 
