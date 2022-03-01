@@ -58,9 +58,9 @@ class App extends React.Component {
     if (this.state.tickers === null) return null;
 
     var monthlyQuotePromises = [
-      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_" + this.state.tickers[0] + ".csv"),
-      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_" + this.state.tickers[1] + ".csv"),
-      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/M_" + this.state.tickers[2] + ".csv")];
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/MA_" + this.state.tickers[0] + ".csv"),
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/MA_" + this.state.tickers[1] + ".csv"),
+      this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/MA_" + this.state.tickers[2] + ".csv")];
     var dailyQuotePromises = [
       this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/D_" + this.state.tickers[0] + ".csv"),
       this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/D_" + this.state.tickers[1] + ".csv"),
