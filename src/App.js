@@ -175,7 +175,7 @@ class App extends React.Component {
   }
 
   setParam (value, params, paramName, defaultValue) {
-    if (value === defaultValue || value === null) {
+    if (value === defaultValue || value === 0) {
       if (params.has(paramName)) params.delete(paramName);
     } else {
       params.set(paramName, value);
@@ -216,14 +216,14 @@ class App extends React.Component {
     var checkbox = e.target;
     var year = checkbox.getAttribute('year');
     var checked = checkbox.checked;
+    this.state.showYear = checked ? Number(year) : 0
 
     // clear all checkboxes except for latest clickced
     var checkboxes = document.getElementsByName('check')
     checkboxes.forEach((item) => {
-        if (item !== checkbox) item.checked = false
+        item.checked = Number(item.getAttribute('year')) === this.state.showYear;
     });
 
-    this.state.showYear = checked ? Number(year) : null;
     this.setParams();
     this.harvestParams();
     this.render();
@@ -335,6 +335,8 @@ class App extends React.Component {
                       <tr>
                         <th colSpan='2'><label><input defaultChecked={0===this.state.showYear} type='checkbox' name='check' year={0} type='checkbox' className='yearButton' onClick={(e)=>this.changeYear(e)} />
                                 <span className='year'>All Years</span></label>
+                                {0===this.state.showYear ? <label><input  type='checkbox' name='check' year={0} type='checkbox' className='yearButton' onClick={(e)=>this.changeYear(e)} />
+                                <span className='year'>...</span></label> : null}
                         </th>
                       </tr>
                     </thead>
