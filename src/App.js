@@ -334,7 +334,7 @@ class App extends React.Component {
                     <thead>
                       <tr>
                         <th colSpan='2'><label><input defaultChecked={0===this.state.showYear} type='checkbox' name='check' year={0} type='checkbox' className='yearButton' onClick={(e)=>this.changeYear(e)} />
-                                <span className='year'>Years</span></label>
+                                <span className='year'>{this.state.startYear.toString() + " - " + this.state.currentYear.toString()}</span></label>
                         </th>
                       </tr>
                     </thead>
