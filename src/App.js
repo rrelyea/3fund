@@ -335,8 +335,6 @@ class App extends React.Component {
                       <tr>
                         <th colSpan='2'><label><input defaultChecked={0===this.state.showYear} type='checkbox' name='check' year={0} type='checkbox' className='yearButton' onClick={(e)=>this.changeYear(e)} />
                                 <span className='year'>All Years</span></label>
-                                {0===this.state.showYear ? <label><input  type='checkbox' name='check' year={0} type='checkbox' className='yearButton' onClick={(e)=>this.changeYear(e)} />
-                                <span className='year'>...</span></label> : null}
                         </th>
                       </tr>
                     </thead>
@@ -349,7 +347,7 @@ class App extends React.Component {
                   <table>
                     <thead>
                       <tr>
-                        <th colSpan='2'>{this.state.showYear !== 0 ? this.state.showYear : ""}</th>
+                        <th colSpan='2'>{this.state.showYear > 0 ? this.state.showYear : ""}</th>
                       </tr>
                     </thead>
                     <tbody>
