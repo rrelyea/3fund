@@ -185,7 +185,7 @@ class App extends React.Component {
   async harvestParams () {
     const params = new URLSearchParams(window.location.search);
     this.state.type = this.getParam(params, 'type', 'VanguardETF');
-    this.state.showYear = this.getParam(params, 'year', this.state.showYear);
+    this.state.showYear = Number(this.getParam(params, 'year', this.state.showYear));
     var fundTypesPromise = this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/fundTypes.csv");
     this.state.fundTypes = await fundTypesPromise;
     this.harvestAllocations();
@@ -446,7 +446,7 @@ class App extends React.Component {
     return years.map( (period, index) => <tr key={index}>
         <td>
           <label>
-            <input name='check' defaultChecked={period[0]===this.state.showYear} year={period[0]} type='checkbox' className='yearButton' onClick={(e)=>changeYear(e)} />
+          <input name='check' defaultChecked={period[0]===this.state.showYear} year={period[0]} type='checkbox' className='yearButton' onClick={(e)=>changeYear(e)} />
             <span className='year'>{period[0]}</span>
           </label>
         </td>
@@ -484,7 +484,7 @@ class App extends React.Component {
       runningTotal = runningTotal * (100.0+Number(composite))/100.0;
       data[month] = runningTotal;
     }
-    
+
     this.chartData.labels = labels;
     this.chartData.datasets = [{
       data:data,
