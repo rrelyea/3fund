@@ -1,6 +1,18 @@
 import papaparse from 'papaparse';
 import React from 'react';
 import './App.css';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  LineController,
+} from "chart.js";
+import { Chart } from 'react-chartjs-2';
 
 class App extends React.Component {
   state = {
@@ -195,6 +207,11 @@ class App extends React.Component {
     this.loadFundInfo();
   }
 
+  chartData =
+              {
+                datasets: []
+              };
+
   render () {
     const handleChange = (e) => {
       this.state.type = e.target.value;
@@ -239,6 +256,23 @@ class App extends React.Component {
       this.render();
     }
 
+    ChartJS.register(LineController, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+    
+    var chartOptions = 
+          {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+              x: {
+                  ticks: {
+                      font: {
+                          size: 10,
+                          },
+                  }
+              }
+            }
+          };
+
     return  (this.state.monthlyQuotes !== null) && 
       <div lang='en'>
         <header className="App-header">
@@ -272,6 +306,7 @@ class App extends React.Component {
               {this.state.editMode ? <input type="range" min="0" max="100" defaultValue={this.state.allocations[1]*100} onInput={(e)=>handleIntlSlide(e,false)} onChange={(e)=>handleIntlSlide(e,true)} /> : false }
             </span>
             <button className='editButton' onClick={(e)=>{toggleEditMode(e)}}>{this.state.editMode ? "save" : "edit"}</button>
+            <Chart type='line' id='chart' height='300' data={this.chartData} options={chartOptions} />
           </div> 
           {this.state.statusMessage !== null ? <h4 id='status'>{this.state.statusMessage}</h4> : null }
           <table>
@@ -429,8 +464,12 @@ class App extends React.Component {
     var assetBond = this.state.allocations[2];
     var showMonth = this.state.showYear === this.state.currentYear ? this.state.currentMonth : 12;
     var months = Array(showMonth);
-    
-    for (var month = showMonth; month > 0; month--) {
+    var labels = Array(showMonth + 1);
+    var data = Array(showMonth + 1);
+    var runningTotal = 10000;
+    labels[0] = "EOY";
+    data[0] = runningTotal;
+    for (var month = 1; month <= showMonth; month++) {
       var delta1 = this.getChange(this.state, this.state.showYear, month, this.state.showYear, month, 0);
       var delta2 = this.getChange(this.state, this.state.showYear, month, this.state.showYear, month, 1);
       var delta3 = this.getChange(this.state, this.state.showYear, month, this.state.showYear, month, 2);
@@ -441,7 +480,19 @@ class App extends React.Component {
       months[showMonth - month] = new Array(2);
       months[showMonth - month][0] = this.month_names_short[month-1];
       months[showMonth - month][1] = isNaN(composite) ? "---" : Number(composite).toFixed(1)+"%";
+      labels[month] = this.month_names_short[month-1];
+      runningTotal = runningTotal * (100.0+Number(composite))/100.0;
+      data[month] = runningTotal;
     }
+    
+    this.chartData.labels = labels;
+    this.chartData.datasets = [{
+      data:data,
+      label: this.state.showYear,
+      borderColor: '#3e95cd',
+      backgroundColor: '#7bb6dd',
+      fill: false,
+    }]
 
     return months.map( (period, index) => period[1] === "---" ? false : <tr key={index}><td>{period[0]}</td><td className='value'>{period[1]}</td></tr> );
   }
