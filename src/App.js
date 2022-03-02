@@ -163,7 +163,7 @@ class App extends React.Component {
   }
 
   setParam (value, params, paramName, defaultValue) {
-    if (value === defaultValue) {
+    if (value === defaultValue || value === null) {
       if (params.has(paramName)) params.delete(paramName);
     } else {
       params.set(paramName, value);
@@ -182,7 +182,7 @@ class App extends React.Component {
   setParams() {
     var params = new URLSearchParams(window.location.search);
     this.setParam(this.state.type, params, 'type', 'VanguardETF');
-    this.setParam(this.state.showYear, params, 'year', this.state.showYear);
+    this.setParam(this.state.showYear, params, 'year', this.state.currentYear);
     if (Array.from(params).length > 0) {
       window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
     } else {
