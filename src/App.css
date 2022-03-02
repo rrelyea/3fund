@@ -57,3 +57,11 @@ span.slash {
 .editButton {
   margin-left: 40px;
 }
+
+input[type="checkbox"] {
+  display: none;
+}
+
+:checked + span {
+  background:lightseagreen;
+}

@@ -412,7 +412,7 @@ class App extends React.Component {
         <td>
           <label>
             <input name='check' defaultChecked={period[0]===this.state.showYear} year={period[0]} type='checkbox' className='yearButton' onClick={(e)=>changeYear(e)} />
-            {period[0]}
+            <span>{period[0]}</span>
           </label>
         </td>
         <td className='value'>{Number(period[1]).toFixed(1)+"%"}</td>
