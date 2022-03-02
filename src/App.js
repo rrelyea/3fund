@@ -450,6 +450,7 @@ class App extends React.Component {
         return;
     }
 
+    this.days = Array(this.state.currentMonth);
     var assetStock = this.state.allocations[0];
     var assetStockIntl = this.state.allocations[1];
     var assetBond = this.state.allocations[2];
