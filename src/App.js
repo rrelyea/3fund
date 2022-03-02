@@ -408,7 +408,15 @@ class App extends React.Component {
       years[this.state.currentYear-year][1] = composite;
     }
 
-    return years.map( (period, index) => <tr key={index}><td><input name='check' defaultChecked={period[0]===this.state.showYear} year={period[0]} type='checkbox' className='yearButton' onClick={(e)=>changeYear(e)} /><label>{period[0]}</label></td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
+    return years.map( (period, index) => <tr key={index}>
+        <td>
+          <label>
+            <input name='check' defaultChecked={period[0]===this.state.showYear} year={period[0]} type='checkbox' className='yearButton' onClick={(e)=>changeYear(e)} />
+            {period[0]}
+          </label>
+        </td>
+        <td className='value'>{Number(period[1]).toFixed(1)+"%"}</td>
+      </tr> );
   }
 
   showMonths () {
