@@ -212,6 +212,23 @@ class App extends React.Component {
                 datasets: []
               };
 
+   changeYear = (e) => {
+    var checkbox = e.target;
+    var year = checkbox.getAttribute('year');
+    var checked = checkbox.checked;
+
+    // clear all checkboxes except for latest clickced
+    var checkboxes = document.getElementsByName('check')
+    checkboxes.forEach((item) => {
+        if (item !== checkbox) item.checked = false
+    });
+
+    this.state.showYear = checked ? Number(year) : null;
+    this.setParams();
+    this.harvestParams();
+    this.render();
+  }
+
   render () {
     const handleChange = (e) => {
       this.state.type = e.target.value;
@@ -316,7 +333,9 @@ class App extends React.Component {
                   <table>
                     <thead>
                       <tr>
-                        <th colSpan='2'>Years</th>
+                        <th colSpan='2'><label><input defaultChecked={0===this.state.showYear} type='checkbox' name='check' year={0} type='checkbox' className='yearButton' onClick={(e)=>this.changeYear(e)} />
+                                <span className='year'>Years</span></label>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -398,23 +417,6 @@ class App extends React.Component {
   }
 
   showYears () {
-    const changeYear = (e) => {
-      var checkbox = e.target;
-      var year = checkbox.getAttribute('year');
-      var checked = checkbox.checked;
-
-      // clear all checkboxes except for latest clickced
-      var checkboxes = document.getElementsByName('check')
-      checkboxes.forEach((item) => {
-          if (item !== checkbox) item.checked = false
-      });
-
-      this.state.showYear = checked ? Number(year) : null;
-      this.setParams();
-      this.harvestParams();
-      this.render();
-    }
-
     if (this.state.monthlyQuotes[0] === null) return null;
     if (this.state.allocations === undefined) return null;
 
@@ -471,7 +473,7 @@ class App extends React.Component {
     return years.map( (period, index) => <tr key={index}>
         <td>
           <label>
-          <input name='check' defaultChecked={period[0]===this.state.showYear} year={period[0]} type='checkbox' className='yearButton' onClick={(e)=>changeYear(e)} />
+          <input name='check' defaultChecked={period[0]===this.state.showYear} year={period[0]} type='checkbox' className='yearButton' onClick={(e)=>this.changeYear(e)} />
             <span className='year'>{period[0]}</span>
           </label>
         </td>
