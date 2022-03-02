@@ -13,7 +13,7 @@ class App extends React.Component {
     currentYear: new Date().getFullYear(),
     currentMonth: new Date().getMonth() + 1,
     showMonth: 0,
-    showYear: 0,
+    showYear: new Date().getFullYear(),
   };
   month_names_short = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -173,7 +173,7 @@ class App extends React.Component {
   async harvestParams () {
     const params = new URLSearchParams(window.location.search);
     this.state.type = this.getParam(params, 'type', 'VanguardETF');
-    this.state.showYear = this.getParam(params, 'year', this.state.currentYear);
+    this.state.showYear = this.getParam(params, 'year', this.state.showYear);
     var fundTypesPromise = this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/fundTypes.csv");
     this.state.fundTypes = await fundTypesPromise;
     this.harvestAllocations();
@@ -182,7 +182,7 @@ class App extends React.Component {
   setParams() {
     var params = new URLSearchParams(window.location.search);
     this.setParam(this.state.type, params, 'type', 'VanguardETF');
-    this.setParam(this.state.showYear, params, 'year', this.state.currentYear);
+    this.setParam(this.state.showYear, params, 'year', this.state.showYear);
     if (Array.from(params).length > 0) {
       window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
     } else {
@@ -363,9 +363,18 @@ class App extends React.Component {
   }
 
   showYears () {
-    const changeYear = (year) => {
-      //TODO: what about years < 2000
-      this.state.showYear = Number(year) + 2000;
+    const changeYear = (e) => {
+      var checkbox = e.target;
+      var year = checkbox.getAttribute('year');
+      var checked = checkbox.checked;
+
+      // clear all checkboxes except for latest clickced
+      var checkboxes = document.getElementsByName('check')
+      checkboxes.forEach((item) => {
+          if (item !== checkbox) item.checked = false
+      });
+
+      this.state.showYear = checked ? Number(year) : null;
       this.setParams();
       this.harvestParams();
       this.render();
@@ -395,14 +404,15 @@ class App extends React.Component {
         (assetBond * 100 * delta3);
       composite = delta1 === null || delta2 === null || delta3 === null ? null : composite;
       years[this.state.currentYear-year] = new Array(2);
-      years[this.state.currentYear-year][0] = year.toString().substr(2);
+      years[this.state.currentYear-year][0] = year;
       years[this.state.currentYear-year][1] = composite;
     }
 
-    return years.map( (period, index) => <tr key={index}><td><button className='yearButton' onClick={()=>changeYear(period[0])}>{period[0]}</button></td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
+    return years.map( (period, index) => <tr key={index}><td><input name='check' defaultChecked={period[0]===this.state.showYear} year={period[0]} type='checkbox' className='yearButton' onClick={(e)=>changeYear(e)} /><label>{period[0]}</label></td><td className='value'>{Number(period[1]).toFixed(1)+"%"}</td></tr> );
   }
 
   showMonths () {
+    if (this.state.showYear === null) return null;
     if (this.state.monthlyQuotes[0] === null) return null;
     if (this.state.allocations === undefined) return null;
 
