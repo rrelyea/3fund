@@ -65,7 +65,8 @@ input[type="checkbox"] {
 .year {
   padding-left: 5px;
   padding-right: 5px;
-  border:1px dotted #4C4E52;
+  border:1px dotted #6F7378
+  ;
 }
 
 :checked + span {
