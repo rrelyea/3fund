@@ -333,7 +333,7 @@ class App extends React.Component {
                   <table>
                     <thead>
                       <tr>
-                        <th colSpan='2'><label><input defaultChecked={0===this.state.showYear} type='checkbox' name='check' year={0} type='checkbox' className='yearButton' onClick={(e)=>this.changeYear(e)} />
+                        <th colSpan='2'><label><input defaultChecked={0===this.state.showYear} type='checkbox' name='check' year={0} className='yearButton' onClick={(e)=>this.changeYear(e)} />
                                 <span className='year'>All Years</span></label>
                         </th>
                       </tr>
