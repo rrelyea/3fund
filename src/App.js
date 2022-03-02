@@ -194,7 +194,7 @@ class App extends React.Component {
   setParams() {
     var params = new URLSearchParams(window.location.search);
     this.setParam(this.state.type, params, 'type', 'VanguardETF');
-    this.setParam(this.state.showYear, params, 'year', this.state.currentYear);
+    this.setParam(this.state.showYear, params, 'year', 0);
     if (Array.from(params).length > 0) {
       window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
     } else {
