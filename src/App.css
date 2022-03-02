@@ -57,16 +57,3 @@ span.slash {
 .editButton {
   margin-left: 40px;
 }
-
-.yearButton {
-  background: transparent;
-  color: white;
-  border: 1px outset yellow;
-  cursor:pointer;
-  font-size: large;
-}
-
-.yearButton:hover {
-  background-color: yellow;
-  color:blue;
-}
