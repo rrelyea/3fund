@@ -421,10 +421,14 @@ class App extends React.Component {
     var assetStock = this.state.allocations[0];
     var assetStockIntl = this.state.allocations[1];
     var assetBond = this.state.allocations[2];
+    var runningTotal = 10000;
+    var eoyLabelAndDataAdded = false;
 
     var years = Array(this.state.currentYear - this.state.startYear);
+    var labels = Array(this.state.currentYear - this.state.startYear + 2);
+    var data = Array(this.state.currentYear - this.state.startYear + 2);
 
-    for (var year = this.state.currentYear; year >= this.state.startYear; year--) {
+    for (var year = this.state.startYear; year <= this.state.currentYear; year++) {
       var endMonth = year === this.state.currentYear ? this.state.currentMonth : 12;
       var startMonth = year === this.state.startYear ? this.state.startMonth + 1 : 1;
       var delta1 = this.getChange(this.state, year, startMonth, year, endMonth, 0);
@@ -438,9 +442,30 @@ class App extends React.Component {
         (assetStock * 100 * (assetStockIntl)) * delta2 + 
         (assetBond * 100 * delta3);
       composite = delta1 === null || delta2 === null || delta3 === null ? null : composite;
-      years[this.state.currentYear-year] = new Array(2);
-      years[this.state.currentYear-year][0] = year;
-      years[this.state.currentYear-year][1] = composite;
+      years[this.state.currentYear - year + 1] = new Array(2);
+      years[this.state.currentYear - year + 1][0] = year;
+      years[this.state.currentYear - year + 1][1] = composite;
+
+      if (!eoyLabelAndDataAdded) {
+        labels[year - this.state.startYear] = this.state.startYear - 1;
+        data[year - this.state.startYear] = runningTotal;
+        eoyLabelAndDataAdded = true;
+      }
+      
+      labels[year - this.state.startYear + 1] = year;
+      runningTotal = runningTotal * (100.0+Number(composite))/100.0;
+      data[year - this.state.startYear + 1] = runningTotal;
+    }
+
+    if (this.state.showYear === 0) {
+      this.chartData.labels = labels;
+      this.chartData.datasets = [{
+        data:data,
+        label: this.state.startYear.toString() + " - " + this.state.currentYear.toString(),
+        borderColor: '#3e95cd',
+        backgroundColor: '#7bb6dd',
+        fill: false,
+      }];
     }
 
     return years.map( (period, index) => <tr key={index}>
@@ -455,7 +480,7 @@ class App extends React.Component {
   }
 
   showMonths () {
-    if (this.state.showYear === null) return null;
+    if (this.state.showYear === 0) return null;
     if (this.state.monthlyQuotes[0] === null) return null;
     if (this.state.allocations === undefined) return null;
 
@@ -499,7 +524,7 @@ class App extends React.Component {
       borderColor: '#3e95cd',
       backgroundColor: '#7bb6dd',
       fill: false,
-    }]
+    }];
 
     return months.map( (period, index) => period[1] === "---" ? false : <tr key={index}><td>{period[0]}</td><td className='value'>{period[1]}</td></tr> );
   }
