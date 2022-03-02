@@ -25,7 +25,7 @@ class App extends React.Component {
     currentYear: new Date().getFullYear(),
     currentMonth: new Date().getMonth() + 1,
     showMonth: 0,
-    showYear: new Date().getFullYear(),
+    showYear: 0,
   };
   month_names_short = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
