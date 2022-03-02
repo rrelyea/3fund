@@ -467,22 +467,29 @@ class App extends React.Component {
     var labels = Array(showMonth + 1);
     var data = Array(showMonth + 1);
     var runningTotal = 10000;
-    labels[0] = "EOY";
-    data[0] = runningTotal;
+    var eoyLabelAndDataAdded = false;
     for (var month = 1; month <= showMonth; month++) {
       var delta1 = this.getChange(this.state, this.state.showYear, month, this.state.showYear, month, 0);
       var delta2 = this.getChange(this.state, this.state.showYear, month, this.state.showYear, month, 1);
       var delta3 = this.getChange(this.state, this.state.showYear, month, this.state.showYear, month, 2);
-      var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
-        (assetStock * 100 * (assetStockIntl)) * delta2 + 
-        (assetBond * 100 * delta3);
-      composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
-      months[showMonth - month] = new Array(2);
-      months[showMonth - month][0] = this.month_names_short[month-1];
-      months[showMonth - month][1] = isNaN(composite) ? "---" : Number(composite).toFixed(1)+"%";
-      labels[month] = this.month_names_short[month-1];
-      runningTotal = runningTotal * (100.0+Number(composite))/100.0;
-      data[month] = runningTotal;
+      if (delta1 !== null && delta2 !== null && delta3 !== null) {
+        var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
+          (assetStock * 100 * (assetStockIntl)) * delta2 + 
+          (assetBond * 100 * delta3);
+        composite = delta1 == null || delta2 == null || delta3 == null ? null : composite;
+        months[showMonth - month] = new Array(2);
+        months[showMonth - month][0] = this.month_names_short[month-1];
+        months[showMonth - month][1] = isNaN(composite) ? "---" : Number(composite).toFixed(1)+"%";
+        if (!eoyLabelAndDataAdded) {
+          labels[month-1] = "EOY";
+          data[month-1] = runningTotal;
+          eoyLabelAndDataAdded = true;
+        }
+        
+        labels[month] = this.month_names_short[month-1];
+        runningTotal = runningTotal * (100.0+Number(composite))/100.0;
+        data[month] = runningTotal;
+      }
     }
 
     this.chartData.labels = labels;
