@@ -328,7 +328,7 @@ class App extends React.Component {
                   <table>
                     <thead>
                       <tr>
-                        <th colSpan='2'>{this.state.showYear}</th>
+                        <th colSpan='2'>{this.state.showYear !== 0 ? this.state.showYear : ""}</th>
                       </tr>
                     </thead>
                     <tbody>
