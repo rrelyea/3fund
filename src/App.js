@@ -323,8 +323,10 @@ class App extends React.Component {
               {this.state.editMode ? <input type="range" min="0" max="100" defaultValue={this.state.allocations[1]*100} onInput={(e)=>handleIntlSlide(e,false)} onChange={(e)=>handleIntlSlide(e,true)} /> : false }
             </span>
             <button className='editButton' onClick={(e)=>{toggleEditMode(e)}}>{this.state.editMode ? "save" : "edit"}</button>
-            <Chart type='line' id='chart' height='300' data={this.chartData} options={chartOptions} />
           </div> 
+          <div className="container">
+            <Chart type='line' id='chart' height='300' data={this.chartData} options={chartOptions} />
+          </div>
           {this.state.statusMessage !== null ? <h4 id='status'>{this.state.statusMessage}</h4> : null }
           <table>
             <tbody>
@@ -373,6 +375,10 @@ class App extends React.Component {
               </tr>
             </tbody>
           </table>
+          <div className='smallerCentered'>
+            Contact <a href="https://twitter.com/rrelyea">@rrelyea</a> or <a href="mailto:rob@relyeas.net">rob@relyeas.net</a> or <a href='https://buymeacoffee.com/rrelyea'>buy me a coffee</a> | 
+            Github repo for <a href="https://github.com/rrelyea/3fund">this site</a> and <a href="https://github.com/rrelyea/3fund-prices">git-scraping</a>
+          </div>
         </header>
       </div>
     ;

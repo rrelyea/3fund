@@ -24,6 +24,11 @@
   color: white;
 }
 
+.smallerCentered {
+  font-Size: 10pt;
+  text-Align: center;
+}
+
 .container {
   flex-wrap: wrap;
   justify-content: center;
@@ -71,4 +76,12 @@ input[type="checkbox"] {
 
 :checked + span {
   background:lightseagreen;
+}
+
+.a {
+  color: white;
+}
+
+a:visited {
+  color: lightblue;
 }
