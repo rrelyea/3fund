@@ -208,25 +208,25 @@ class App extends React.Component {
   }
 
   chartData =
-              {
-                datasets: []
-              };
+    {
+      datasets: []
+    };
 
-   changeYear = (e) => {
-    var checkbox = e.target;
-    var year = checkbox.getAttribute('year');
-    var checked = checkbox.checked;
-    this.state.showYear = checked ? Number(year) : 0
+    changeYear = (e) => {
+      var checkbox = e.target;
+      var year = checkbox.getAttribute('year');
+      var checked = checkbox.checked;
+      this.state.showYear = checked ? Number(year) : 0
+  
+      // clear all checkboxes except for latest clickced
+      var checkboxes = document.getElementsByName('check')
+      checkboxes.forEach((item) => {
+          item.checked = Number(item.getAttribute('year')) === this.state.showYear;
+      });
 
-    // clear all checkboxes except for latest clickced
-    var checkboxes = document.getElementsByName('check')
-    checkboxes.forEach((item) => {
-        item.checked = Number(item.getAttribute('year')) === this.state.showYear;
-    });
-
-    this.setParams();
-    this.harvestParams();
-    this.render();
+      this.setParams();
+      this.harvestParams();
+      this.render();
   }
 
   render () {
@@ -375,10 +375,11 @@ class App extends React.Component {
               </tr>
             </tbody>
           </table>
+          <div className='smallerCentered'>&nbsp;</div>
           <div className='smallerCentered'>
-            Contact <a href="https://twitter.com/rrelyea">@rrelyea</a> or <a href="mailto:rob@relyeas.net">rob@relyeas.net</a> or <a href='https://buymeacoffee.com/rrelyea'>buy me a coffee</a> | 
-            Github repo for <a href="https://github.com/rrelyea/3fund">this site</a> and <a href="https://github.com/rrelyea/3fund-prices">git-scraping</a>
+            <b>Sponsor:</b> <a href='https://buymeacoffee.com/rrelyea'>buy me a coffee?</a> <b>Contact:</b> <a href="mailto:rob@relyeas.net">rob@relyeas.net</a>, <a href="https://twitter.com/rrelyea">twitter/rrelyea</a> <b>Programmers:</b> <a href="https://github.com/rrelyea/3fund">/3fund</a>, <a href="https://github.com/rrelyea/3fund-prices">/3fund-prices</a>
           </div>
+          <div className='smallerCentered'>&nbsp;</div>
         </header>
       </div>
     ;
@@ -544,7 +545,7 @@ class App extends React.Component {
   showDaysHeader () {
     this.calculateDays();
     if (this.state.currentYear === this.state.showYear) {
-      var month = this.state.currentMonth - 1;
+      var month = this.state.currentMonth;
       if (this.days[0][0] > new Date().getDay()) {
         month = month - 1;
       }

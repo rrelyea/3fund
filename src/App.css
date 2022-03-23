@@ -78,10 +78,21 @@ input[type="checkbox"] {
   background:lightseagreen;
 }
 
-.a {
-  color: white;
+
+a:link {
+  text-decoration: none;
+  color: lightblue;
 }
 
 a:visited {
-  color: lightblue;
+  text-decoration: none;
+  color: mediumorchid;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:active {
+  text-decoration: underline;
 }
