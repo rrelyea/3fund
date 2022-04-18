@@ -189,6 +189,7 @@ class App extends React.Component {
     var fundTypesPromise = this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/fundTypes.csv");
     this.state.fundTypes = await fundTypesPromise;
     this.harvestAllocations();
+    document.title = "3fund " + params.toString();
   }
 
   setParams() {
@@ -200,6 +201,8 @@ class App extends React.Component {
     } else {
       window.history.replaceState({}, "", `${window.location.pathname}`);
     }
+
+    document.title = "3fund " + params.toString();
   }
 
   async componentDidMount () {
