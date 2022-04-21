@@ -18,6 +18,8 @@ class App extends React.Component {
   state = {
     monthlyQuotes: null,
     dailyQuotes: null,
+    earliestYear: 0,
+    earliestMonth: 0,
     startYear: 0,
     startMonth: 0,
     statusMessage: "Loading prices",
@@ -110,8 +112,16 @@ class App extends React.Component {
     
           if (s === sI && sI === b) {
             var date = this.state.monthlyQuotes[0][this.state.indexes[0]][0];
-            this.state.startYear = parseInt(date.substr(0,4));
-            this.state.startMonth = parseInt(date.substr(5,2));
+            this.state.earliestYear = parseInt(date.substr(0,4));
+            this.state.earliestMonth = parseInt(date.substr(5,2));
+            if (this.state.startYear === 0 || this.state.startYear < this.state.earliestYear) {
+              this.state.startYear = this.state.earliestYear;
+              this.setParams();
+            }
+            if (this.state.startMonth === 0 || (this.state.startYear <= this.state.earliestYear && this.state.startMonth < this.state.earliestMonth)) {
+              this.state.startMonth = this.state.earliestMonth;
+              this.setParams();
+            }
             loop = false;
           }
         }
@@ -186,6 +196,8 @@ class App extends React.Component {
     const params = new URLSearchParams(window.location.search);
     this.state.type = this.getParam(params, 'type', 'VanguardETF');
     this.state.showYear = Number(this.getParam(params, 'year', this.state.showYear));
+    this.state.startYear = Number(this.getParam(params, 'startYear', this.state.earliestYear));
+    this.state.startMonth = Number(this.getParam(params, 'startMonth', this.state.earliestMonth));
     var fundTypesPromise = this.toCsv("https://raw.githubusercontent.com/rrelyea/3fund-prices/main/data/fundTypes.csv");
     this.state.fundTypes = await fundTypesPromise;
     this.harvestAllocations();
@@ -196,6 +208,8 @@ class App extends React.Component {
     var params = new URLSearchParams(window.location.search);
     this.setParam(this.state.type, params, 'type', 'VanguardETF');
     this.setParam(this.state.showYear, params, 'year', 0);
+    this.setParam(this.state.startMonth, params, 'startMonth', this.state.earliestMonth);
+    this.setParam(this.state.startYear, params, 'startYear', this.state.earliestYear);
     if (Array.from(params).length > 0) {
       window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
     } else {
@@ -232,11 +246,31 @@ class App extends React.Component {
       this.render();
   }
 
+  getYearsList(earliestYear, currentYear) {
+    let content = [];
+    for (let y = earliestYear; y <= currentYear; y++) {
+      content.push(<option key={y} value={y}>{y}</option>);
+    }
+    return content;
+  }
+  
   render () {
     const handleChange = (e) => {
       this.state.type = e.target.value;
       this.setParams();
       this.loadFundInfo();
+      this.render();
+    }
+
+    const handleMonthChange = (e) => {
+      this.state.startMonth = Number(e.target.value);
+      this.setParams();
+      this.render();
+    }
+
+    const handleYearChange = (e) => {
+      this.state.startYear = Number(e.target.value);
+      this.setParams();
       this.render();
     }
 
@@ -292,7 +326,6 @@ class App extends React.Component {
               }
             }
           };
-
     return  (this.state.monthlyQuotes !== null) && 
       <div lang='en'>
         <header className="App-header">
@@ -326,6 +359,19 @@ class App extends React.Component {
               {this.state.editMode ? <input type="range" min="0" max="100" defaultValue={this.state.allocations[1]*100} onInput={(e)=>handleIntlSlide(e,false)} onChange={(e)=>handleIntlSlide(e,true)} /> : false }
             </span>
             <button className='editButton' onClick={(e)=>{toggleEditMode(e)}}>{this.state.editMode ? "save" : "edit"}</button>
+            {this.state.editMode ? 
+            <><div><span className='allocation'>
+              Start month:<select defaultValue={this.state.startMonth} onChange={(e) => handleMonthChange(e)}>
+              {this.month_names_short.map((monthName,index) => 
+                <option key={index} value={index+1}>{monthName}</option>
+              )} 
+              </select>
+              </span></div>
+              <div><span className='allocation'>
+              Start year:<select defaultValue={this.state.startYear} onChange={(e) => handleYearChange(e)}>
+                {this.getYearsList(this.state.earliestYear, this.state.currentYear)}
+              </select>
+            </span></div></>: false}
           </div> 
           <div className="container">
             <Chart type='line' id='chart' height='300' data={this.chartData} options={chartOptions} />
@@ -336,18 +382,14 @@ class App extends React.Component {
               <tr>
                 <td className='column'>
                   <table>
-                    <thead>
-                      <tr>
-                        <th colSpan='2'>
-                            <label>
-                              <input defaultChecked={0===this.state.showYear} type='checkbox' name='check' year={0} className='yearButton' onClick={(e)=>this.changeYear(e)} />
-                              <span className='year'>All Years</span>
-                            </label>
-                        </th>
-                      </tr>
-                    </thead>
                     <tbody>
                         <>{this.showYears()}</>
+                        <tr><td>
+                        <label>
+                          <input defaultChecked={0===this.state.showYear} type='checkbox' name='check' year={0} className='yearButton' onClick={(e)=>this.changeYear(e)} />
+                          <span className='year'>{(this.state.startMonth == this.state.earliestMonth && this.state.startYear == this.state.earliestYear) ? "All " : "Custom "}Years</span>
+                        </label>
+                        </td></tr>
                     </tbody>
                   </table>
                 </td>
@@ -389,7 +431,7 @@ class App extends React.Component {
   }
 
   getPrice (data, year, month, fund) {
-    var i = (year - data.startYear) * 12 + (month - data.startMonth);
+    var i = (year - data.earliestYear) * 12 + (month - data.earliestMonth);
     if (i + data.indexes[fund] < 1) return null;
     if (i + data.indexes[fund] > data.monthlyQuotes[fund].length) return null;
     return data.monthlyQuotes[fund][i + data.indexes[fund]][1];
@@ -445,7 +487,7 @@ class App extends React.Component {
 
     for (var year = this.state.startYear; year <= this.state.currentYear; year++) {
       var endMonth = year === this.state.currentYear ? this.state.currentMonth : 12;
-      var startMonth = year === this.state.startYear ? this.state.startMonth + 1 : 1;
+      var startMonth = year === this.state.startYear ? this.state.startMonth  : 1;
       var delta1 = this.getChange(this.state, year, startMonth, year, endMonth, 0);
       if (isNaN(delta1)) {
         endMonth = endMonth - 1;
@@ -509,6 +551,7 @@ class App extends React.Component {
     var runningTotal = 10000;
     var eoyLabelAndDataAdded = false;
     for (var month = 1; month <= showMonth; month++) {
+      if (this.state.showYear === parseInt(this.state.startYear) && month < parseInt(this.state.startMonth)) continue;
       var delta1 = this.getChange(this.state, this.state.showYear, month, this.state.showYear, month, 0);
       var delta2 = this.getChange(this.state, this.state.showYear, month, this.state.showYear, month, 1);
       var delta3 = this.getChange(this.state, this.state.showYear, month, this.state.showYear, month, 2);
@@ -521,7 +564,7 @@ class App extends React.Component {
         months[showMonth - month][0] = this.month_names_short[month-1];
         months[showMonth - month][1] = isNaN(composite) ? "---" : Number(composite).toFixed(1)+"%";
         if (!eoyLabelAndDataAdded) {
-          labels[month-1] = "EOY";
+          labels[month-1] = month === 1 ? "EOY" : this.month_names_short[month-2];
           data[month-1] = runningTotal;
           eoyLabelAndDataAdded = true;
         }
