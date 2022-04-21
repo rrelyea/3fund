@@ -387,7 +387,7 @@ class App extends React.Component {
                         <tr><td>
                         <label>
                           <input defaultChecked={0===this.state.showYear} type='checkbox' name='check' year={0} className='yearButton' onClick={(e)=>this.changeYear(e)} />
-                          <span className='year'>{(this.state.startMonth == this.state.earliestMonth && this.state.startYear == this.state.earliestYear) ? "All " : "Custom "}Years</span>
+                          <span className='year'>{(this.state.startMonth === this.state.earliestMonth && this.state.startYear === this.state.earliestYear) ? "All " : "Custom "}Years</span>
                         </label>
                         </td></tr>
                     </tbody>
