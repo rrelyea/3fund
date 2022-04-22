@@ -276,6 +276,7 @@ class App extends React.Component {
       this.setParams();
       this.render();
     }
+
     const handleYearChange = (e) => {
       this.state.startYear = Number(e.target.value);
       this.setParams();
@@ -594,9 +595,7 @@ class App extends React.Component {
           months[showMonth + 1 - monthCount - headerUsed] = new Array(2);
           months[showMonth + 1 - monthCount - headerUsed][0] = year - 1;
           headerUsed = 1;
-          console.log(months);
         }
-        console.log(showMonth, monthCount, headerUsed);
         months[showMonth + 1 - monthCount - headerUsed] = new Array(2);
         months[showMonth + 1 - monthCount - headerUsed][0] = this.month_names_short[month-1];
         months[showMonth + 1 - monthCount - headerUsed][1] = isNaN(composite) ? "---" : Number(composite).toFixed(1)+"%";
