@@ -501,10 +501,14 @@ class App extends React.Component {
     var eoyLabelAndDataAdded = false;
 
     var years = Array(this.state.currentYear - this.state.startYear);
-    var labels = Array(this.state.currentYear - this.state.startYear + 2);
-    var data = Array(this.state.currentYear - this.state.startYear + 2);
+    var labels = Array(this.state.currentYear + 1 - this.state.startYear + 2);
+    var data = Array(this.state.currentYear + 1 - this.state.startYear + 2);
     
-    for (var year = this.state.startYear; year <= this.state.currentYear; year++) {
+    for (var year = this.state.startYear; year <= this.state.currentYear + 1; year++) {
+      if (year === this.state.currentYear + 1 && (this.state.firstFiscalMonth === 1 || this.state.currentMonth < this.state.firstFiscalMonth)) {
+        break;
+      }
+
       var endMonth = year === this.state.currentYear ? this.state.currentMonth : 12;
       var startMonth = year === this.state.startYear ? this.state.startMonth  : 1;
       var endYear = year;
@@ -513,12 +517,15 @@ class App extends React.Component {
         endMonth = year < this.state.currentYear ? this.state.firstFiscalMonth - 1 : this.state.currentMonth;
         startMonth = this.state.firstFiscalMonth;
         startYear = year - 1;
+        endYear = year === this.state.currentYear + 1 ? year - 1 : year;
       }
+
       var delta1 = this.getChange(this.state, startYear, startMonth, endYear, endMonth, 0);
       if (isNaN(delta1)) {
         endMonth = endMonth - 1;
         delta1 = this.getChange(this.state, startYear, startMonth, endYear, endMonth, 0);
       }
+
       var delta2 = this.getChange(this.state, startYear, startMonth, endYear, endMonth, 1);
       var delta3 = this.getChange(this.state, startYear, startMonth, endYear, endMonth, 2);
       var composite = (assetStock * 100 * (1-assetStockIntl)) * delta1 + 
@@ -634,7 +641,10 @@ class App extends React.Component {
   days = Array(this.state.currentMonth);
   showDaysHeader () {
     this.calculateDays();
-    if (this.state.currentYear === this.state.showYear) {
+    if (
+      (this.state.firstFiscalMonth === 1 &&  this.state.showYear === this.state.currentYear) ||
+      (this.state.firstFiscalMonth !== 1 &&  this.state.showYear === this.state.currentYear + 1)
+      ) {
       var month = this.state.currentMonth;
       if (this.days[0][0] > new Date().getDay()) {
         month = month - 1;
@@ -674,7 +684,9 @@ class App extends React.Component {
   }
 
   showDays () {
-    if (this.state.showYear !== this.state.currentYear ||
+    if (
+      (this.state.firstFiscalMonth === 1 &&  this.state.showYear !== this.state.currentYear) ||
+      (this.state.firstFiscalMonth !== 1 &&  this.state.showYear !== this.state.currentYear + 1) ||
       this.state.monthlyQuotes[0] === null ||
       this.state.allocations === undefined) {
         return <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>;
