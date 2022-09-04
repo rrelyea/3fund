@@ -657,7 +657,11 @@ class App extends React.Component {
   }
 
   calculateDays () {  
-    if (this.state.showYear !== this.state.currentYear ||
+    if (
+      (
+      (this.state.firstFiscalMonth === 1 &&  this.state.showYear !== this.state.currentYear) ||
+      (this.state.firstFiscalMonth !== 1 &&  this.state.showYear !== this.state.currentYear + 1)
+      ) ||
       this.state.monthlyQuotes[0] === null ||
       this.state.allocations === undefined) {
         return;
