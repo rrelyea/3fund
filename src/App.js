@@ -339,6 +339,8 @@ class App extends React.Component {
       <div lang='en'>
         <header className="App-header">
           <div>
+            <div><a href='https://bogle.tools'>bogle.tools</a> - 3fund performance</div>
+            <hr/>
             <select id='fundType' value={this.state.type} onChange={(e) => handleChange(e)}>
               {this.state.fundTypes.filter(fundType => fundType[0] !== '' && fundType[0] !== 'type').map((fundType,index) => 
                 <option key={index} value={fundType.length > 0 ? fundType[0] : "filler"}>{fundType.length > 0 ? fundType[0] : "filler"}</option>
