@@ -426,18 +426,6 @@ class App extends React.Component {
                     </tbody>
                   </table>
                 </td>
-                <td className='column'>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th colSpan='2'>{this.showDaysHeader()}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        <>{this.showDays()}</>
-                    </tbody>
-                  </table>
-                </td>
               </tr>
             </tbody>
           </table>
